@@ -9,6 +9,8 @@ import { getDb } from './db';
 import authRoutes from './routes/auth';
 import nodeRoutes from './routes/nodes';
 import commentRoutes from './routes/comments';
+import vectorRoutes from './routes/vector';
+import chatRoutes from './routes/chat';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +24,8 @@ getDb();
 app.use('/api/auth', authRoutes);
 app.use('/api/nodes', nodeRoutes);
 app.use('/api/nodes/:nodeId/comments', commentRoutes);
+app.use('/api/vector', vectorRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
