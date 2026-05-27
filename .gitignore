@@ -1,0 +1,7 @@
+node_modules/
+dist/
+data/*.db
+data/docs/
+.env
+*.log
+.code-review-graph/
