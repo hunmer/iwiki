@@ -2,6 +2,21 @@ import type { DocNode, Comment, VectorSearchResult } from '@/types';
 
 const BASE = '/api';
 
+/** 将 snake_case 的 API 响应转换为 camelCase 的 DocNode */
+function toDocNode(raw: any): DocNode {
+  return {
+    id: raw.id,
+    parentId: raw.parent_id ?? raw.parentId ?? null,
+    title: raw.title,
+    icon: raw.icon,
+    sortOrder: raw.sort_order ?? raw.sortOrder ?? 0,
+    isTrash: raw.is_trash ?? raw.isTrash ?? 0,
+    createdAt: raw.created_at ?? raw.createdAt ?? 0,
+    updatedAt: raw.updated_at ?? raw.updatedAt ?? 0,
+    content: raw.content,
+  };
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
@@ -22,10 +37,10 @@ export const api = {
     }),
   logout: () => request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
   checkAuth: () => request<{ authenticated: boolean }>('/auth/check'),
-  getNodes: () => request<DocNode[]>('/nodes'),
-  getNode: (id: string) => request<DocNode & { content: string }>(`/nodes/${id}`),
-  createNode: (data: { title: string; parentId?: string | null; icon?: string }) =>
-    request<DocNode>('/nodes', { method: 'POST', body: JSON.stringify(data) }),
+  getNodes: async () => (await request<any[]>('/nodes')).map(toDocNode),
+  getNode: async (id: string) => toDocNode(await request<any>(`/nodes/${id}`)) as DocNode & { content: string },
+  createNode: async (data: { title: string; parentId?: string | null; icon?: string }) =>
+    toDocNode(await request<any>('/nodes', { method: 'POST', body: JSON.stringify(data) })),
   updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId'>>) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   updateContent: (id: string, content: string) =>

@@ -7,3 +7,4 @@ server/src/data/
 .env
 *.log
 .code-review-graph/
+.agentspace/*
