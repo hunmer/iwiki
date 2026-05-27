@@ -1,5 +1,6 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Search, Menu, LogOut, LogIn } from 'lucide-react';
+import { Inspector } from 'react-dev-inspector';
 import { Button } from '@/components/ui/button';
 import { useWikiStore } from '@/stores/wiki';
 import { api } from '@/lib/api';
@@ -43,6 +44,7 @@ export default function Layout() {
         <Outlet />
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <Inspector />
     </div>
   );
 }
