@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
+import { $prose } from '@milkdown/utils';
+import { createSlashPlugin } from './slash-menu';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
@@ -27,11 +29,16 @@ export default function Editor({ value, readOnly, onChange }: Props) {
       defaultValue: value,
       features: {
         [Crepe.Feature.Toolbar]: !readOnly,
+        [Crepe.Feature.BlockEdit]: false, // 禁用内置 block-edit，使用自定义 slash 菜单
       },
     });
 
+    // 在创建编辑器前，添加自定义 slash 菜单插件
+    const slashPlugin = $prose((ctx) => createSlashPlugin(ctx));
+    crepe.editor.use(slashPlugin);
+
     crepe.on((api) => {
-      api.markdownUpdated((ctx, markdown) => {
+      api.markdownUpdated((_ctx, markdown) => {
         onChangeRef.current?.(markdown);
       });
     });
