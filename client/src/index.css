@@ -5,34 +5,37 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: hsl(0 0% 10.2%);
-  --foreground: hsl(0 0% 87.8%);
-  --card: hsl(0 0% 13.3%);
-  --card-foreground: hsl(0 0% 87.8%);
-  --popover: hsl(0 0% 13.3%);
-  --popover-foreground: hsl(0 0% 87.8%);
+  --background: hsl(0 0% 98%);
+  --foreground: hsl(0 0% 10.2%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 10.2%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 10.2%);
   --primary: hsl(187 100% 41.6%);
   --primary-foreground: hsl(0 0% 0%);
-  --secondary: hsl(0 0% 16.5%);
-  --secondary-foreground: hsl(0 0% 87.8%);
-  --muted: hsl(0 0% 16.5%);
-  --muted-foreground: hsl(0 0% 55%);
+  --secondary: hsl(0 0% 95%);
+  --secondary-foreground: hsl(0 0% 10.2%);
+  --muted: hsl(0 0% 95%);
+  --muted-foreground: hsl(0 0% 45%);
   --accent: hsl(187 100% 41.6%);
   --accent-foreground: hsl(0 0% 0%);
   --destructive: hsl(0 84% 60%);
   --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(0 0% 20%);
-  --input: hsl(0 0% 20%);
+  --border: hsl(0 0% 88%);
+  --input: hsl(0 0% 88%);
   --ring: hsl(187 100% 41.6%);
   --radius: 0.5rem;
-  --sidebar-background: hsl(0 0% 6.7%);
-  --sidebar-foreground: hsl(0 0% 87.8%);
+  --sidebar-background: hsl(0 0% 96%);
+  --sidebar-foreground: hsl(0 0% 10.2%);
   --sidebar-primary: hsl(187 100% 41.6%);
   --sidebar-primary-foreground: hsl(0 0% 0%);
-  --sidebar-accent: hsl(0 0% 10.2%);
-  --sidebar-accent-foreground: hsl(0 0% 87.8%);
-  --sidebar-border: hsl(0 0% 20%);
+  --sidebar-accent: hsl(0 0% 93%);
+  --sidebar-accent-foreground: hsl(0 0% 10.2%);
+  --sidebar-border: hsl(0 0% 88%);
   --sidebar-ring: hsl(187 100% 41.6%);
+  --surface: hsl(0 0% 100%);
+  --charcoal: hsl(0 0% 88%);
+  --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 .dark {
@@ -63,6 +66,9 @@
   --sidebar-accent-foreground: hsl(0 0% 87.8%);
   --sidebar-border: hsl(0 0% 20%);
   --sidebar-ring: hsl(187 100% 41.6%);
+  --surface: hsl(0 0% 6.7%);
+  --charcoal: hsl(0 0% 20%);
+  --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
 @theme inline {
@@ -94,8 +100,8 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-cyan: #00BCD4;
-  --color-charcoal: #333333;
-  --color-dark-surface: #111111;
+  --color-charcoal: var(--charcoal);
+  --color-dark-surface: var(--surface);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -132,8 +138,8 @@
 }
 
 body {
-  background: hsl(0 0% 10.2%);
-  color: hsl(0 0% 87.8%);
+  background: var(--background);
+  color: var(--foreground);
 }
 
 ::selection {

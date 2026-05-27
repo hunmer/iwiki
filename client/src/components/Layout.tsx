@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogOut, LogIn, Terminal } from 'lucide-react';
+import { Search, Menu, LogOut, LogIn, Terminal, Sun, Moon } from 'lucide-react';
 import { Inspector } from 'react-dev-inspector';
+import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useWikiStore } from '@/stores/wiki';
 import { api } from '@/lib/api';
@@ -13,6 +14,7 @@ export default function Layout() {
   const toggleSidebar = useWikiStore((s) => s.toggleSidebar);
   const [searchOpen, setSearchOpen] = useState(false);
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await api.logout();
@@ -29,8 +31,11 @@ export default function Layout() {
           <Terminal className="h-4 w-4" />
           iWiki
         </Link>
-        <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="text-muted-foreground hover:text-primary">
-          <Search className="h-4 w-4 mr-1" /> 搜索
+        <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="text-muted-foreground hover:text-primary">
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="text-muted-foreground hover:text-primary">          <Search className="h-4 w-4 mr-1" /> 搜索
         </Button>
         {isAuthenticated ? (
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-primary">
