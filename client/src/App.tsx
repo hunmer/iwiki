@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import WikiPage from '@/pages/WikiPage';
 import LoginPage from '@/pages/LoginPage';
+import AdminPage from '@/pages/AdminPage';
 import { useWikiStore } from '@/stores/wiki';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/admin" element={<AdminPage />} />
       <Route path="/docs/:id" element={<WikiPage />} />
       <Route path="/" element={<Navigate to="/docs" replace />} />
       <Route path="/docs" element={<WikiPage />} />
