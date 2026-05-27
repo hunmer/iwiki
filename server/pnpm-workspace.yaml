@@ -1,0 +1,12 @@
+ignoredBuiltDependencies:
+  - better-sqlite3
+
+onlyBuiltDependencies:
+  - b
+  - d
+  - e
+  - esbuild
+  - i
+  - l
+  - s
+  - u

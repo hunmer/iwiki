@@ -1,9 +1,10 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.17.1",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "pnpm exec vite",
     "build": "tsc",
     "start": "node dist/index.js"
   },
