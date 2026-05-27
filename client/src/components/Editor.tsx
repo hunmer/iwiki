@@ -21,7 +21,6 @@ function MilkdownEditorInner({ value, readOnly }: Props) {
       })
       .use(nord)
       .use(commonmark)
-      .create()
   );
 
   return (
