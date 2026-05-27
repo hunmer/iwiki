@@ -47,6 +47,7 @@ export default function DocContent({ nodeId }: { nodeId: string | null }) {
         {title || '无标题'}
       </h1>
       <Editor
+        key={nodeId}
         value={content}
         readOnly={!isAuthenticated}
         onChange={handleContentChange}
