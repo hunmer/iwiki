@@ -8,6 +8,7 @@ import cookieParser from 'cookie-parser';
 import { getDb } from './db';
 import authRoutes from './routes/auth';
 import nodeRoutes from './routes/nodes';
+import commentRoutes from './routes/comments';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,6 +21,7 @@ getDb();
 
 app.use('/api/auth', authRoutes);
 app.use('/api/nodes', nodeRoutes);
+app.use('/api/nodes/:nodeId/comments', commentRoutes);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
