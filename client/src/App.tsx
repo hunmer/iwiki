@@ -1,9 +1,24 @@
-function App() {
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import WikiPage from '@/pages/WikiPage';
+import LoginPage from '@/pages/LoginPage';
+import { useWikiStore } from '@/stores/wiki';
+
+export default function App() {
+  const loadNodes = useWikiStore((s) => s.loadNodes);
+  const checkAuth = useWikiStore((s) => s.checkAuth);
+
+  useEffect(() => {
+    loadNodes();
+    checkAuth();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <h1 className="text-2xl font-bold p-8">iWiki</h1>
-    </div>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/docs/:id" element={<WikiPage />} />
+      <Route path="/" element={<Navigate to="/docs" replace />} />
+      <Route path="/docs" element={<WikiPage />} />
+    </Routes>
   );
 }
-
-export default App;
