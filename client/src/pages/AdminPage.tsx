@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { api } from '@/lib/api';
 import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
-import { Trash2, Database, MessageSquare } from 'lucide-react';
+import { Trash2, Database, MessageSquare, Users, Hash, Clock } from 'lucide-react';
 import type { Comment } from '@/types';
 
 export default function AdminPage() {
@@ -57,15 +57,21 @@ export default function AdminPage() {
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto animate-fade-in">
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-6">管理后台</h1>
+        <h1 className="text-2xl font-bold mb-6 text-foreground">管理后台</h1>
 
         <div className="flex gap-2 mb-6">
-          <Button variant={tab === 'comments' ? 'default' : 'outline'} onClick={() => setTab('comments')}>
+          <Button
+            variant={tab === 'comments' ? 'default' : 'outline'}
+            onClick={() => setTab('comments')}
+          >
             <MessageSquare className="h-4 w-4 mr-1" /> 评论管理
           </Button>
-          <Button variant={tab === 'vector' ? 'default' : 'outline'} onClick={() => setTab('vector')}>
+          <Button
+            variant={tab === 'vector' ? 'default' : 'outline'}
+            onClick={() => setTab('vector')}
+          >
             <Database className="h-4 w-4 mr-1" /> 向量索引
           </Button>
         </div>
@@ -73,37 +79,51 @@ export default function AdminPage() {
         {tab === 'comments' && (
           <div className="space-y-3">
             {comments.map(c => (
-              <div key={c.id} className="border rounded-lg p-4 flex items-start gap-4">
+              <div key={c.id} className="border border-charcoal rounded-lg p-4 flex items-start gap-4 bg-card hover:border-muted-foreground/30 transition-colors duration-200">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium text-sm">{c.nickname}</span>
+                    <span className="font-medium text-sm text-foreground">{c.nickname}</span>
                     <span className="text-xs text-muted-foreground">{new Date(c.createdAt).toLocaleString()}</span>
                   </div>
-                  <p className="text-sm">{c.content}</p>
+                  <p className="text-sm text-muted-foreground">{c.content}</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => handleDeleteComment(c.nodeId, c.id)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                <Button variant="ghost" size="icon" onClick={() => handleDeleteComment(c.nodeId, c.id)} className="text-muted-foreground hover:text-destructive">
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             ))}
-            {comments.length === 0 && <p className="text-muted-foreground text-center py-8">暂无评论</p>}
+            {comments.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Users className="h-8 w-8 mx-auto mb-2 text-charcoal" />
+                <p className="text-sm">暂无评论</p>
+              </div>
+            )}
           </div>
         )}
 
         {tab === 'vector' && vectorStats && (
           <div className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">文档数量</p>
-                <p className="text-2xl font-bold">{String(vectorStats.nodeCount || 0)}</p>
+              <div className="border border-charcoal rounded-lg p-4 bg-card">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <Hash className="h-4 w-4" />
+                  <p className="text-xs">文档数量</p>
+                </div>
+                <p className="text-2xl font-bold text-primary">{String(vectorStats.nodeCount || 0)}</p>
               </div>
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">已索引片段</p>
-                <p className="text-2xl font-bold">{String(vectorStats.indexedCount || 0)}</p>
+              <div className="border border-charcoal rounded-lg p-4 bg-card">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <Database className="h-4 w-4" />
+                  <p className="text-xs">已索引片段</p>
+                </div>
+                <p className="text-2xl font-bold text-primary">{String(vectorStats.indexedCount || 0)}</p>
               </div>
-              <div className="border rounded-lg p-4">
-                <p className="text-sm text-muted-foreground">最后索引</p>
-                <p className="text-sm">{vectorStats.lastIndexedAt ? new Date(vectorStats.lastIndexedAt as number).toLocaleString() : '从未'}</p>
+              <div className="border border-charcoal rounded-lg p-4 bg-card">
+                <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                  <Clock className="h-4 w-4" />
+                  <p className="text-xs">最后索引</p>
+                </div>
+                <p className="text-sm text-muted-foreground">{vectorStats.lastIndexedAt ? new Date(vectorStats.lastIndexedAt as number).toLocaleString() : '从未'}</p>
               </div>
             </div>
             <Button onClick={handleBuildIndex} disabled={indexing}>

@@ -4,6 +4,7 @@ import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { MessageSquare } from 'lucide-react';
 import type { Comment } from '@/types';
 
 function CommentItem({ comment, onReply, onDelete }: {
@@ -16,18 +17,18 @@ function CommentItem({ comment, onReply, onDelete }: {
   return (
     <div className="py-3">
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-sm font-medium">{comment.nickname}</span>
+        <span className="text-sm font-medium text-foreground">{comment.nickname}</span>
         <span className="text-xs text-muted-foreground">
           {new Date(comment.createdAt).toLocaleString()}
         </span>
       </div>
-      <p className="text-sm whitespace-pre-wrap">{comment.content}</p>
-      <div className="flex gap-2 mt-1">
-        <button className="text-xs text-muted-foreground hover:text-foreground" onClick={() => onReply(comment.id)}>
+      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{comment.content}</p>
+      <div className="flex gap-3 mt-1">
+        <button className="text-xs text-muted-foreground hover:text-primary transition-colors" onClick={() => onReply(comment.id)}>
           回复
         </button>
         {isAuthenticated && (
-          <button className="text-xs text-destructive hover:text-destructive/80" onClick={() => onDelete(comment.id)}>
+          <button className="text-xs text-muted-foreground hover:text-destructive transition-colors" onClick={() => onDelete(comment.id)}>
             删除
           </button>
         )}
@@ -83,14 +84,17 @@ export default function CommentSection({ nodeId }: Props) {
   const getReplies = (parentId: string) => comments.filter(c => c.parentId === parentId);
 
   return (
-    <div className="border-t mt-8 pt-6 px-8 pb-8 max-w-4xl">
-      <h2 className="text-lg font-semibold mb-4">评论 ({comments.length})</h2>
+    <div className="border-t border-charcoal mt-8 pt-6 px-8 pb-8 max-w-4xl">
+      <h2 className="text-lg font-semibold mb-4 text-foreground flex items-center gap-2">
+        <MessageSquare className="h-4 w-4 text-primary" />
+        评论 ({comments.length})
+      </h2>
 
-      <div className="space-y-2 mb-6">
+      <div className="space-y-3 mb-6">
         {replyTo && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>回复评论</span>
-            <button className="text-destructive" onClick={() => setReplyTo(null)}>取消</button>
+            <button className="text-primary" onClick={() => setReplyTo(null)}>取消</button>
           </div>
         )}
         <div className="flex gap-2">
@@ -98,13 +102,13 @@ export default function CommentSection({ nodeId }: Props) {
             placeholder="昵称"
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            className="w-32"
+            className="w-32 bg-input border-charcoal"
           />
           <Textarea
             placeholder={replyTo ? '写下你的回复...' : '写下你的评论...'}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="flex-1"
+            className="flex-1 bg-input border-charcoal"
             rows={2}
           />
         </div>
@@ -113,19 +117,19 @@ export default function CommentSection({ nodeId }: Props) {
         </Button>
       </div>
 
-      <div className="divide-y">
+      <div className="divide-y divide-charcoal">
         {topLevel.map(comment => (
           <div key={comment.id}>
             <CommentItem comment={comment} onReply={setReplyTo} onDelete={handleDelete} />
             {getReplies(comment.id).map(reply => (
-              <div key={reply.id} className="ml-8 border-l pl-4">
+              <div key={reply.id} className="ml-8 border-l border-charcoal pl-4">
                 <CommentItem comment={reply} onReply={setReplyTo} onDelete={handleDelete} />
               </div>
             ))}
           </div>
         ))}
         {comments.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">暂无评论</p>
+          <p className="text-xs text-muted-foreground text-center py-4">暂无评论</p>
         )}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { useWikiStore } from '@/stores/wiki';
+import { Search } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -49,27 +50,32 @@ export default function SearchDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0">
-        <div className="p-4">
-          <Input
-            placeholder="搜索文档..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-          />
+      <DialogContent className="sm:max-w-md p-0 bg-background border-charcoal shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+        <div className="p-4 border-b border-charcoal">
+          <div className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="搜索文档..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              className="border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+            />
+          </div>
         </div>
-        <div className="max-h-64 overflow-auto border-t">
-          {results.map((r) => (
+        <div className="max-h-64 overflow-auto">
+          {results.map((r, i) => (
             <button
               key={r.id}
-              className="w-full text-left px-4 py-2 hover:bg-muted text-sm"
+              className="w-full text-left px-4 py-2.5 hover:bg-muted/50 text-sm text-foreground hover:text-primary transition-colors duration-150 border-b border-charcoal/50 last:border-0"
+              style={{ animationDelay: `${i * 40}ms` }}
               onClick={() => handleSelect(r.id)}
             >
               {r.title || '无标题'}
             </button>
           ))}
           {query && results.length === 0 && (
-            <p className="text-sm text-muted-foreground p-4 text-center">未找到匹配文档</p>
+            <p className="text-xs text-muted-foreground p-4 text-center">未找到匹配文档</p>
           )}
         </div>
       </DialogContent>

@@ -52,13 +52,15 @@ function TreeNode({ node, children, depth }: { node: DocNode; children: DocNode[
     <div>
       <div
         className={cn(
-          'flex items-center gap-1 py-1 px-2 cursor-pointer hover:bg-muted rounded text-sm group',
-          isActive && 'bg-muted font-medium',
+          'flex items-center gap-1 py-1.5 px-2 cursor-pointer rounded-sm text-sm group transition-colors duration-200',
+          isActive
+            ? 'bg-primary/10 text-primary border-l-2 border-primary'
+            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground border-l-2 border-transparent',
         )}
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         {hasChildren ? (
-          <button onClick={() => setExpanded(!expanded)} className="shrink-0">
+          <button onClick={() => setExpanded(!expanded)} className="shrink-0 text-muted-foreground">
             {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
           </button>
         ) : (
@@ -67,7 +69,7 @@ function TreeNode({ node, children, depth }: { node: DocNode; children: DocNode[
         <span className="shrink-0">{node.icon}</span>
         {renaming ? (
           <Input
-            className="h-6 text-sm flex-1"
+            className="h-6 text-sm flex-1 bg-input border-border"
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={handleRename}
@@ -82,21 +84,21 @@ function TreeNode({ node, children, depth }: { node: DocNode; children: DocNode[
         {isAuthenticated && (
           <span className="hidden group-hover:flex gap-0.5">
             <button
-              className="p-0.5 hover:bg-muted-foreground/10 rounded"
+              className="p-0.5 hover:text-primary rounded transition-colors"
               onClick={async (e) => { e.stopPropagation(); const id = await createNode('', node.id); if (id) navigate(`/docs/${id}`); }}
               title="新建子文档"
             >
               <Plus className="h-3 w-3" />
             </button>
             <button
-              className="p-0.5 hover:bg-muted-foreground/10 rounded"
+              className="p-0.5 hover:text-primary rounded transition-colors"
               onClick={(e) => { e.stopPropagation(); setRenaming(true); setName(node.title); }}
               title="重命名"
             >
               <FileText className="h-3 w-3" />
             </button>
             <button
-              className="p-0.5 hover:bg-muted-foreground/10 rounded"
+              className="p-0.5 hover:text-destructive rounded transition-colors"
               onClick={async (e) => { e.stopPropagation(); await trashNode(node.id, true); }}
               title="删除"
             >
@@ -128,17 +130,18 @@ export default function DocTree() {
   const rootNodes = tree.get(null) || [];
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-2 border-b">
+    <div className="h-full flex flex-col bg-sidebar-background">
+      <div className="p-3 border-b border-charcoal">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">文档</span>
+          <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">文档</span>
           {isAuthenticated && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon-xs"
               onClick={async () => { const id = await createNode('新建文档'); if (id) navigate(`/docs/${id}`); }}
+              className="text-muted-foreground hover:text-primary"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
             </Button>
           )}
         </div>
@@ -148,7 +151,7 @@ export default function DocTree() {
           <TreeNodeWrapper key={node.id} node={node} depth={0} />
         ))}
         {rootNodes.length === 0 && (
-          <p className="text-sm text-muted-foreground p-4 text-center">暂无文档</p>
+          <p className="text-xs text-muted-foreground p-4 text-center">暂无文档</p>
         )}
       </div>
     </div>
