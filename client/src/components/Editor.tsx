@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
 import { commandsCtx } from '@milkdown/kit/core';
-import { clearTextInCurrentBlockCommand } from '@milkdown/kit/preset/commonmark';
+import { clearTextInCurrentBlockCommand, htmlSchema } from '@milkdown/kit/preset/commonmark';
 import { insert } from '@milkdown/kit/utils';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
@@ -47,6 +47,37 @@ const videoIcon = `
 function escapeHtmlAttr(value: string) {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
+
+const renderableHtmlSchema = htmlSchema.extendSchema((prev) => (ctx) => {
+  const base = prev(ctx);
+
+  return {
+    ...base,
+    toDOM: (node) => {
+      const value = String(node.attrs.value ?? '');
+      const wrapper = document.createElement('span');
+      wrapper.setAttribute('data-type', 'html');
+      wrapper.setAttribute('data-value', value);
+
+      const videoMatch = value.match(
+        /^<video\b[^>]*\bsrc=(["'])(.*?)\1[^>]*>(?:<\/video>)?$/i,
+      );
+
+      if (videoMatch) {
+        const video = document.createElement('video');
+        video.controls = true;
+        video.src = videoMatch[2];
+        video.preload = 'metadata';
+        video.style.maxWidth = '100%';
+        wrapper.appendChild(video);
+      } else {
+        wrapper.textContent = value;
+      }
+
+      return wrapper;
+    },
+  };
+});
 
 function selectVideoFile(): Promise<File | null> {
   return new Promise((resolve) => {
@@ -120,13 +151,15 @@ export default function Editor({ value, readOnly, onChange }: Props) {
                 const url = await uploadFile(file);
                 const commands = ctx.get(commandsCtx);
                 commands.call(clearTextInCurrentBlockCommand.key);
-                insert(`<video controls src="${escapeHtmlAttr(url)}"></video>`)(ctx);
+                insert(`<video controls src="${escapeHtmlAttr(url)}">`)(ctx);
               },
             });
           },
         },
       },
     });
+
+    crepe.editor.use(renderableHtmlSchema);
 
     crepe.on((api) => {
       api.markdownUpdated((_ctx, markdown) => {
