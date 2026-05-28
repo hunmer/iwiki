@@ -53,6 +53,11 @@ export const api = {
     request<{ success: boolean }>(`/nodes/${id}/trash`, { method: 'PUT', body: JSON.stringify({ isTrash }) }),
   moveNode: (id: string, data: { parentId?: string | null; sortOrder?: number }) =>
     request<{ success: boolean }>(`/nodes/${id}/move`, { method: 'PUT', body: JSON.stringify(data) }),
+  batchReorder: (moves: Array<{ id: string; parentId: string | null; sortOrder: number }>) =>
+    request<{ success: boolean }>('/nodes/reorder', {
+      method: 'PUT',
+      body: JSON.stringify({ moves }),
+    }),
   getVersions: (id: string) => request<any[]>(`/nodes/${id}/versions`),
   getVersion: (nodeId: string, versionId: string) =>
     request<any>(`/nodes/${nodeId}/versions/${versionId}`),

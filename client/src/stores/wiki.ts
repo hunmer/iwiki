@@ -18,6 +18,7 @@ interface WikiState {
   trashNode: (id: string, isTrash: boolean) => Promise<void>;
   renameNode: (id: string, title: string) => Promise<void>;
   moveNode: (id: string, parentId: string | null, sortOrder: number) => Promise<void>;
+  batchReorderNodes: (moves: Array<{ id: string; parentId: string | null; sortOrder: number }>) => Promise<void>;
 }
 
 export const useWikiStore = create<WikiState>((set, get) => ({
@@ -96,6 +97,16 @@ export const useWikiStore = create<WikiState>((set, get) => ({
       nodes: s.nodes.map(n =>
         n.id === id ? { ...n, parentId, sortOrder } : n
       ),
+    }));
+  },
+
+  batchReorderNodes: async (moves) => {
+    await api.batchReorder(moves);
+    set((s) => ({
+      nodes: s.nodes.map((n) => {
+        const move = moves.find((m) => m.id === n.id);
+        return move ? { ...n, parentId: move.parentId, sortOrder: move.sortOrder } : n;
+      }),
     }));
   },
 }));

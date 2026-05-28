@@ -45,6 +45,29 @@ router.post('/', authMiddleware, (req: AuthRequest, res: Response) => {
   res.status(201).json({ id, parentId, title, icon, sortOrder: 0, isTrash: 0, createdAt: now, updatedAt: now });
 });
 
+// Batch reorder nodes
+router.put('/reorder', authMiddleware, (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { moves } = req.body;
+
+  if (!Array.isArray(moves) || moves.length === 0) {
+    res.status(400).json({ error: '无效参数' });
+    return;
+  }
+
+  const now = Date.now();
+  const updateMany = db.transaction((items: any[]) => {
+    for (const item of items) {
+      db.prepare(
+        'UPDATE nodes SET parent_id = ?, sort_order = ?, updated_at = ? WHERE id = ?'
+      ).run(item.parentId, item.sortOrder, now, item.id);
+    }
+  });
+
+  updateMany(moves);
+  res.json({ success: true });
+});
+
 // Update node metadata
 router.put('/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   const db = getDb();
