@@ -5,7 +5,7 @@
   "packageManager": "pnpm@10.17.1",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -20,6 +20,7 @@
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.6",
+    "react-dev-inspector": "^2.0.1",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1",
     "sonner": "^2.0.7",
@@ -32,7 +33,7 @@
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "code-inspector-plugin": "^1.5.1",
     "dom-inspector-hook": "^0.2.1",
     "eslint": "^10.3.0",
@@ -41,6 +42,6 @@
     "globals": "^17.6.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
-    "vite": "^8.0.12"
+    "vite": "^5.4.11"
   }
 }

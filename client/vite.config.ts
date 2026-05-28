@@ -7,12 +7,12 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [
-    react(),
-    tailwindcss(),
     codeInspectorPlugin({
       bundler: 'vite',
       behavior: createBehavior(),
     }),
+    react(),
+    tailwindcss(),
   ],
   resolve: {
     alias: {
