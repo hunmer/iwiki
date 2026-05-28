@@ -11,6 +11,10 @@ import nodeRoutes from './routes/nodes';
 import commentRoutes from './routes/comments';
 import vectorRoutes from './routes/vector';
 import chatRoutes from './routes/chat';
+import tagRoutes from './routes/tags';
+import uploadRoutes from './routes/uploads';
+
+const DATA_DIR = process.env.DATA_DIR || './data';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -26,6 +30,11 @@ app.use('/api/nodes', nodeRoutes);
 app.use('/api/nodes/:nodeId/comments', commentRoutes);
 app.use('/api/vector', vectorRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/tags', tagRoutes);
+app.use('/api/uploads', uploadRoutes);
+
+// 静态文件服务：上传的图片/视频
+app.use('/uploads', express.static(path.resolve(DATA_DIR, 'uploads')));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
