@@ -7,7 +7,7 @@ import App from './App';
 import './index.css';
 
 bindCaptureListener({
-  url: 'http://localhost:3999',
+  url: 'http://localhost:3100/api/inspector/track',
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

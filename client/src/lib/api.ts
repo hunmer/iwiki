@@ -43,6 +43,8 @@ export const api = {
     toDocNode(await request<any>('/nodes', { method: 'POST', body: JSON.stringify(data) })),
   updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId'>>) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateTitle: (id: string, title: string) =>
+    request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify({ title }) }),
   updateContent: (id: string, content: string) =>
     request<{ success: boolean }>(`/nodes/${id}/content`, { method: 'PUT', body: JSON.stringify({ content }) }),
   deleteNode: (id: string) =>

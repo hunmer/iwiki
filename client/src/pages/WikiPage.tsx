@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import DocTree from '@/components/DocTree';
 import DocContent from '@/components/DocContent';
@@ -11,6 +11,7 @@ export default function WikiPage() {
   const { id } = useParams<{ id: string }>();
   const setActiveId = useWikiStore((s) => s.setActiveId);
   const sidebarCollapsed = useWikiStore((s) => s.sidebarCollapsed);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     setActiveId(id || null);
@@ -22,8 +23,8 @@ export default function WikiPage() {
         {!sidebarCollapsed && <DocTree />}
       </div>
       <div className="flex-1 overflow-auto">
-        <DocContent nodeId={id || null} />
-        {id && <CommentSection nodeId={id} />}
+        <DocContent nodeId={id || null} onEditingChange={setIsEditing} />
+        {id && !isEditing && <CommentSection nodeId={id} />}
       </div>
       <AiChat />
     </>
