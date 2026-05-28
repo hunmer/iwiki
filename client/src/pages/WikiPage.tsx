@@ -23,7 +23,7 @@ export default function WikiPage() {
         {!sidebarCollapsed && <DocTree />}
       </div>
       <div className="flex-1 flex overflow-hidden">
-        <div className="flex-[3] overflow-y-auto overflow-x-hidden border-r">
+        <div className="flex-[3] flex flex-col overflow-hidden border-r">
           <DocContent nodeId={id || null} onEditingChange={setIsEditing} />
         </div>
         {id && !isEditing && (

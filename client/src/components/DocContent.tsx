@@ -185,7 +185,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
           </div>
         )}
       </div>
-      {isAuthenticated ? (
+      {isAuthenticated && editMode ? (
         <TagInput
           tags={tags}
           setTags={handleTagsChange}

@@ -81,5 +81,5 @@ export default function Editor({ value, readOnly, onChange }: Props) {
     crepeRef.current?.setReadonly(!!readOnly);
   }, [readOnly]);
 
-  return <div ref={editorRef} />;
+  return <div ref={editorRef} className="flex-1" />;
 }

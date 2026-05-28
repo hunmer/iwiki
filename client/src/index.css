@@ -137,6 +137,35 @@
   font-family: 'JetBrains Mono', monospace;
 }
 
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+.milkdown {
+  height: 100%;
+}
+
+.dark .milkdown {
+  --crepe-color-background: hsl(0 0% 10.2%);
+  --crepe-color-on-background: hsl(0 0% 87.8%);
+  --crepe-color-surface: hsl(0 0% 13.3%);
+  --crepe-color-surface-low: hsl(0 0% 16.5%);
+  --crepe-color-on-surface: hsl(0 0% 87.8%);
+  --crepe-color-on-surface-variant: hsl(0 0% 55%);
+  --crepe-color-outline: hsl(0 0% 45%);
+  --crepe-color-primary: hsl(187 100% 41.6%);
+  --crepe-color-secondary: hsl(0 0% 20%);
+  --crepe-color-on-secondary: hsl(0 0% 87.8%);
+  --crepe-color-inverse: hsl(0 0% 13.3%);
+  --crepe-color-on-inverse: hsl(0 0% 87.8%);
+  --crepe-color-inline-code: hsl(0 84% 60%);
+  --crepe-color-error: hsl(0 84% 60%);
+  --crepe-color-hover: hsl(0 0% 16.5%);
+  --crepe-color-selected: hsl(0 0% 20%);
+  --crepe-color-inline-area: hsl(0 0% 20%);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

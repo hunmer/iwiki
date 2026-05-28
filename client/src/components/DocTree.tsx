@@ -178,8 +178,8 @@ export default function DocTree() {
         >
           {/* Drag handle */}
           {isAuthenticated && (
-            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity">
-              <GripVertical className="h-3 w-3" />
+            <span className="shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover:opacity-50 hover:opacity-100 transition-opacity scale-90">
+              <GripVertical className="h-2.5 w-2.5" />
             </span>
           )}
 

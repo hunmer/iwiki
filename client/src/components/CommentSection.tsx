@@ -210,7 +210,7 @@ export default function CommentSection({ nodeId }: Props) {
   const topLevel = comments.filter(c => !c.parentId);
 
   return (
-    <div className="overflow-hidden rounded-lg bg-card">
+    <div className="h-full flex flex-col overflow-hidden rounded-lg bg-card">
       {/* Header */}
       <div className="border-b px-4 py-3">
         <h2 className="text-sm font-medium flex items-center gap-2">
@@ -223,7 +223,7 @@ export default function CommentSection({ nodeId }: Props) {
       </div>
 
       {/* Comments List */}
-      <div className="p-3 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-2">
         {topLevel.map(comment => {
           const replies = commentsByParentId[comment.id] || [];
           return (

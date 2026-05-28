@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Empty } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { useWikiStore } from '@/stores/wiki';
@@ -50,7 +51,7 @@ export default function SearchDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 bg-background border-charcoal shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
+      <DialogContent showCloseButton={false} className="sm:max-w-md p-0 bg-background border-charcoal shadow-[0_2px_10px_rgba(0,0,0,0.3)]">
         <div className="p-4 border-b border-charcoal">
           <div className="flex items-center gap-2">
             <Search className="h-4 w-4 text-muted-foreground" />
@@ -75,7 +76,10 @@ export default function SearchDialog({ open, onOpenChange }: Props) {
             </button>
           ))}
           {query && results.length === 0 && (
-            <p className="text-xs text-muted-foreground p-4 text-center">未找到匹配文档</p>
+            <Empty title="未找到匹配文档" description="试试其他关键词" />
+          )}
+          {!query && (
+            <Empty title="输入关键词搜索文档" description="支持标题搜索和语义搜索" />
           )}
         </div>
       </DialogContent>
