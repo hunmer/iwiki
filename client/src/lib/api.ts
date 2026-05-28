@@ -109,4 +109,14 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history }),
     }),
+  getTags: () => request<Array<{ name: string; count: number }>>('/tags'),
+  renameTag: (oldName: string, newName: string) =>
+    request<{ success: boolean; updated: number }>('/tags/rename', {
+      method: 'PUT',
+      body: JSON.stringify({ oldName, newName }),
+    }),
+  deleteTag: (name: string) =>
+    request<{ success: boolean; updated: number }>(`/tags/${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    }),
 };

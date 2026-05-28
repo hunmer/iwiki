@@ -4,29 +4,27 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuid } from 'uuid';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-
-const DATA_DIR = process.env.DATA_DIR || './data';
-const UPLOADS_DIR = path.resolve(DATA_DIR, 'uploads');
+import { UPLOADS_DIR } from '../constants';
 
 // 确保上传目录存在
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-const ALLOWED_MIME_TYPES = new Set([
-  // 图片
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-  'image/bmp',
-  // 视频
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-  'video/x-msvideo',
-]);
+// MIME 类型与允许的扩展名映射（用于交叉校验，防止伪造扩展名）
+const MIME_EXT_MAP: Record<string, string[]> = {
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/gif': ['.gif'],
+  'image/webp': ['.webp'],
+  'image/bmp': ['.bmp'],
+  'video/mp4': ['.mp4'],
+  'video/webm': ['.webm'],
+  'video/quicktime': ['.mov'],
+  'video/x-msvideo': ['.avi'],
+};
+
+const ALLOWED_MIME_TYPES = new Set(Object.keys(MIME_EXT_MAP));
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
@@ -46,6 +44,12 @@ const upload = multer({
   fileFilter: (_req, file, cb) => {
     if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
       cb(new Error(`不支持的文件类型: ${file.mimetype}`));
+      return;
+    }
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = MIME_EXT_MAP[file.mimetype];
+    if (allowedExts && ext && !allowedExts.includes(ext)) {
+      cb(new Error(`文件扩展名 ${ext} 与文件类型 ${file.mimetype} 不匹配`));
       return;
     }
     cb(null, true);
@@ -75,7 +79,7 @@ router.use((err: any, _req: any, res: Response, _next: any) => {
     res.status(413).json({ error: '文件大小超过限制 (最大 50MB)' });
     return;
   }
-  if (err.message?.startsWith('不支持的文件类型')) {
+  if (err.message?.startsWith('不支持的文件类型') || err.message?.includes('不匹配')) {
     res.status(415).json({ error: err.message });
     return;
   }

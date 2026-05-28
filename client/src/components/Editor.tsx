@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
+import { commandsCtx } from '@milkdown/kit/core';
+import { clearTextInCurrentBlockCommand } from '@milkdown/kit/preset/commonmark';
+import { insert } from '@milkdown/kit/utils';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
@@ -13,19 +16,47 @@ async function uploadFile(file: File): Promise<string> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await fetch('/api/uploads', {
-    method: 'POST',
-    credentials: 'include',
-    body: formData,
-  });
+  try {
+    const res = await fetch('/api/uploads', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: '上传失败' }));
-    throw new Error(err.error || '上传失败');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: '上传失败' }));
+      throw new Error(err.error || '上传失败');
+    }
+
+    const { url } = await res.json();
+    return url;
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : '上传失败';
+    alert(message);
+    throw err;
   }
+}
 
-  const { url } = await res.json();
-  return url;
+const videoIcon = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M4 6.5C4 5.67 4.67 5 5.5 5H14.5C15.33 5 16 5.67 16 6.5V17.5C16 18.33 15.33 19 14.5 19H5.5C4.67 19 4 18.33 4 17.5V6.5Z" stroke="currentColor" stroke-width="1.8" />
+    <path d="M16 9.25L20 7V17L16 14.75" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+  </svg>
+`;
+
+function escapeHtmlAttr(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function selectVideoFile(): Promise<File | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'video/mp4,video/webm,video/quicktime,video/x-msvideo,.mp4,.webm,.mov,.avi';
+    input.onchange = () => resolve(input.files?.[0] ?? null);
+    input.oncancel = () => resolve(null);
+    input.click();
+  });
 }
 
 export default function Editor({ value, readOnly, onChange }: Props) {
@@ -78,6 +109,21 @@ export default function Editor({ value, readOnly, onChange }: Props) {
             table: { label: '表格' },
             math: { label: '数学公式' },
           },
+          buildMenu: (builder) => {
+            builder.getGroup('advanced').addItem('video', {
+              label: '上传视频',
+              icon: videoIcon,
+              onRun: async (ctx) => {
+                const file = await selectVideoFile();
+                if (!file) return;
+
+                const url = await uploadFile(file);
+                const commands = ctx.get(commandsCtx);
+                commands.call(clearTextInCurrentBlockCommand.key);
+                insert(`<video controls src="${escapeHtmlAttr(url)}"></video>`)(ctx);
+              },
+            });
+          },
         },
       },
     });
@@ -104,5 +150,5 @@ export default function Editor({ value, readOnly, onChange }: Props) {
     crepeRef.current?.setReadonly(!!readOnly);
   }, [readOnly]);
 
-  return <div ref={editorRef} className="flex-1" />;
+  return <div ref={editorRef} className="flex-1 min-h-0" />;
 }

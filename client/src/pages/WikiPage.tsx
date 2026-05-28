@@ -18,21 +18,33 @@ export default function WikiPage() {
   }, [id]);
 
   return (
-    <>
-      <div className={cn('border-r overflow-y-auto overflow-x-hidden shrink-0 transition-all', sidebarCollapsed ? 'w-0' : 'w-64')}>
-        {!sidebarCollapsed && <DocTree />}
+    <div className="flex-1 flex gap-4 p-4 overflow-hidden">
+      {/* 左侧目录 - 悬浮卡片 */}
+      <div className={cn('shrink-0 transition-all', sidebarCollapsed ? 'w-0' : 'w-64')}>
+        {!sidebarCollapsed && (
+          <div className="h-full bg-card border border-border rounded-lg shadow-md overflow-hidden">
+            <DocTree />
+          </div>
+        )}
       </div>
-      <div className="flex-1 flex overflow-hidden">
-        <div className="flex-[3] flex flex-col overflow-hidden border-r">
-          <DocContent nodeId={id || null} onEditingChange={setIsEditing} />
+      {/* 中间内容 + 右侧评论 */}
+      <div className="flex-1 flex gap-4 overflow-hidden">
+        {/* 中间内容 - 悬浮卡片 */}
+        <div className="flex-[3] flex flex-col overflow-hidden">
+          <div className="flex-1 flex flex-col bg-card border border-border rounded-lg shadow-md overflow-hidden">
+            <DocContent nodeId={id || null} onEditingChange={setIsEditing} />
+          </div>
         </div>
+        {/* 右侧评论 - 悬浮卡片 */}
         {id && !isEditing && (
-          <div className="flex-[2] overflow-y-auto overflow-x-hidden">
-            <CommentSection nodeId={id} />
+          <div className="flex-[2] overflow-hidden">
+            <div className="h-full bg-card border border-border rounded-lg shadow-md overflow-hidden">
+              <CommentSection nodeId={id} />
+            </div>
           </div>
         )}
       </div>
       <AiChat />
-    </>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { getDb } from './db';
+import { DATA_DIR, UPLOADS_DIR } from './constants';
 import authRoutes from './routes/auth';
 import nodeRoutes from './routes/nodes';
 import commentRoutes from './routes/comments';
@@ -13,8 +14,6 @@ import vectorRoutes from './routes/vector';
 import chatRoutes from './routes/chat';
 import tagRoutes from './routes/tags';
 import uploadRoutes from './routes/uploads';
-
-const DATA_DIR = process.env.DATA_DIR || './data';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -34,7 +33,7 @@ app.use('/api/tags', tagRoutes);
 app.use('/api/uploads', uploadRoutes);
 
 // 静态文件服务：上传的图片/视频
-app.use('/uploads', express.static(path.resolve(DATA_DIR, 'uploads')));
+app.use('/uploads', express.static(UPLOADS_DIR));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });

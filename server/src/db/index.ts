@@ -1,10 +1,7 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-
-const DATA_DIR = process.env.DATA_DIR || './data';
-const DB_PATH = path.resolve(DATA_DIR, 'wiki.db');
-const DOCS_DIR = path.resolve(DATA_DIR, 'docs');
+import { DATA_DIR, DB_PATH, DOCS_DIR } from '../constants';
 
 let _db: Database.Database | null = null;
 

@@ -257,7 +257,7 @@ export default function DocTree() {
   });
 
   return (
-    <div className="h-full flex flex-col bg-sidebar-background">
+    <div className="h-full flex flex-col">
       <div className="p-3 border-b border-charcoal">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

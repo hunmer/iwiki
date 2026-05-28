@@ -210,7 +210,7 @@ export default function CommentSection({ nodeId }: Props) {
   const topLevel = comments.filter(c => !c.parentId);
 
   return (
-    <div className="h-full flex flex-col overflow-hidden rounded-lg bg-card">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="border-b px-4 py-3">
         <h2 className="text-sm font-medium flex items-center gap-2">
