@@ -14,7 +14,6 @@ export default function Editor({ value, readOnly, onChange }: Props) {
   const crepeRef = useRef<Crepe | null>(null);
   const onChangeRef = useRef(onChange);
 
-  // 保持 onChange 引用最新，避免闭包过期
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
@@ -26,37 +25,35 @@ export default function Editor({ value, readOnly, onChange }: Props) {
       root: editorRef.current,
       defaultValue: value,
       features: {
-        [Crepe.Feature.Toolbar]: !readOnly,
-        [Crepe.Feature.BlockEdit]: !readOnly,
-        [Crepe.Feature.Commands]: !readOnly,
+        [Crepe.Feature.Toolbar]: true,
+        [Crepe.Feature.BlockEdit]: true,
       },
       featureConfigs: {
         [Crepe.Feature.BlockEdit]: {
-          // 确保 slash 菜单启用
           textGroup: {
             label: '文本',
-            text: { label: '正文', icon: undefined },
-            h1: { label: '标题 1', icon: undefined },
-            h2: { label: '标题 2', icon: undefined },
-            h3: { label: '标题 3', icon: undefined },
-            h4: { label: '标题 4', icon: undefined },
-            h5: { label: '标题 5', icon: undefined },
-            h6: { label: '标题 6', icon: undefined },
-            quote: { label: '引用', icon: undefined },
-            divider: { label: '分割线', icon: undefined },
+            text: { label: '正文' },
+            h1: { label: '标题 1' },
+            h2: { label: '标题 2' },
+            h3: { label: '标题 3' },
+            h4: { label: '标题 4' },
+            h5: { label: '标题 5' },
+            h6: { label: '标题 6' },
+            quote: { label: '引用' },
+            divider: { label: '分割线' },
           },
           listGroup: {
             label: '列表',
-            bulletList: { label: '无序列表', icon: undefined },
-            orderedList: { label: '有序列表', icon: undefined },
-            taskList: { label: '任务列表', icon: undefined },
+            bulletList: { label: '无序列表' },
+            orderedList: { label: '有序列表' },
+            taskList: { label: '任务列表' },
           },
           advancedGroup: {
             label: '高级',
-            image: { label: '图片', icon: undefined },
-            codeBlock: { label: '代码块', icon: undefined },
-            table: { label: '表格', icon: undefined },
-            math: { label: '数学公式', icon: undefined },
+            image: { label: '图片' },
+            codeBlock: { label: '代码块' },
+            table: { label: '表格' },
+            math: { label: '数学公式' },
           },
         },
       },
@@ -76,10 +73,10 @@ export default function Editor({ value, readOnly, onChange }: Props) {
       crepe.destroy();
       crepeRef.current = null;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // 仅挂载时创建，通过父组件 key 切换文档
+    // 仅挂载时创建，文档切换由父组件通过 key 重建编辑器。
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  // readOnly 变化时更新编辑器状态
   useEffect(() => {
     crepeRef.current?.setReadonly(!!readOnly);
   }, [readOnly]);
