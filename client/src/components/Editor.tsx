@@ -1,7 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
-import { $prose } from '@milkdown/utils';
-import { createSlashPlugin } from './slash-menu';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
@@ -29,13 +27,40 @@ export default function Editor({ value, readOnly, onChange }: Props) {
       defaultValue: value,
       features: {
         [Crepe.Feature.Toolbar]: !readOnly,
-        [Crepe.Feature.BlockEdit]: false, // 禁用内置 block-edit，使用自定义 slash 菜单
+        [Crepe.Feature.BlockEdit]: !readOnly,
+        [Crepe.Feature.Commands]: !readOnly,
+      },
+      featureConfigs: {
+        [Crepe.Feature.BlockEdit]: {
+          // 确保 slash 菜单启用
+          textGroup: {
+            label: '文本',
+            text: { label: '正文', icon: undefined },
+            h1: { label: '标题 1', icon: undefined },
+            h2: { label: '标题 2', icon: undefined },
+            h3: { label: '标题 3', icon: undefined },
+            h4: { label: '标题 4', icon: undefined },
+            h5: { label: '标题 5', icon: undefined },
+            h6: { label: '标题 6', icon: undefined },
+            quote: { label: '引用', icon: undefined },
+            divider: { label: '分割线', icon: undefined },
+          },
+          listGroup: {
+            label: '列表',
+            bulletList: { label: '无序列表', icon: undefined },
+            orderedList: { label: '有序列表', icon: undefined },
+            taskList: { label: '任务列表', icon: undefined },
+          },
+          advancedGroup: {
+            label: '高级',
+            image: { label: '图片', icon: undefined },
+            codeBlock: { label: '代码块', icon: undefined },
+            table: { label: '表格', icon: undefined },
+            math: { label: '数学公式', icon: undefined },
+          },
+        },
       },
     });
-
-    // 在创建编辑器前，添加自定义 slash 菜单插件
-    const slashPlugin = $prose((ctx) => createSlashPlugin(ctx));
-    crepe.editor.use(slashPlugin);
 
     crepe.on((api) => {
       api.markdownUpdated((_ctx, markdown) => {

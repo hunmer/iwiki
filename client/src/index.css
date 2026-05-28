@@ -163,33 +163,3 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(0 0% 30%);
 }
-
-/* --- Slash 菜单样式 --- */
-.slash-view {
-  position: absolute;
-  z-index: 50;
-  min-width: 180px;
-  max-height: 280px;
-  overflow-y: auto;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--popover);
-  color: var(--popover-foreground);
-  box-shadow: 0 4px 16px var(--shadow-color);
-  padding: 4px;
-}
-
-.slash-item {
-  padding: 6px 12px;
-  border-radius: calc(var(--radius) - 2px);
-  cursor: pointer;
-  font-size: 0.875rem;
-  line-height: 1.4;
-  transition: background 120ms ease;
-}
-
-.slash-item:hover,
-.slash-item.active {
-  background: var(--accent);
-  color: var(--accent-foreground);
-}
