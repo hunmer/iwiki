@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { api } from '@/lib/api';
 import { useWikiStore } from '@/stores/wiki';
 import Editor from '@/components/Editor';
+import EmojiPicker from '@/components/EmojiPicker';
 import { FileText, Edit2, Check, X } from 'lucide-react';
 
 interface DocContentProps {
@@ -12,6 +13,7 @@ interface DocContentProps {
 export default function DocContent({ nodeId, onEditingChange }: DocContentProps) {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
+  const [icon, setIcon] = useState<string | undefined>();
   const [editingTitle, setEditingTitle] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [tempTitle, setTempTitle] = useState('');
@@ -19,6 +21,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const renameNode = useWikiStore((s) => s.renameNode);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const iconSaveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -27,6 +30,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     api.getNode(nodeId).then(node => {
       setContent(node.content || '');
       setTitle(node.title);
+      setIcon(node.icon);
       setTempTitle(node.title);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -83,6 +87,15 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     }
   };
 
+  const handleIconChange = (newIcon: string) => {
+    if (!nodeId || !isAuthenticated) return;
+    setIcon(newIcon);
+    clearTimeout(iconSaveTimerRef.current);
+    iconSaveTimerRef.current = setTimeout(() => {
+      api.updateNode(nodeId, { icon: newIcon });
+    }, 500);
+  };
+
   if (!nodeId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-3 animate-fade-in">
@@ -99,6 +112,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
       <div className="flex items-start justify-between mb-6 gap-4">
         {editingTitle ? (
           <div className="flex items-center gap-2 flex-1">
+            {icon && <span className="text-2xl">{icon}</span>}
             <input
               ref={titleInputRef}
               type="text"
@@ -125,6 +139,15 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
           </div>
         ) : (
           <div className="flex items-center gap-2 flex-1">
+            {isAuthenticated && (
+              <EmojiPicker
+                value={icon}
+                onChange={handleIconChange}
+              />
+            )}
+            {icon && !isAuthenticated && (
+              <span className="text-2xl mr-2">{icon}</span>
+            )}
             <h1 className="text-[clamp(1.5rem,3vw,2.25rem)] font-bold text-foreground tracking-tight">
               {title || '无标题'}
             </h1>

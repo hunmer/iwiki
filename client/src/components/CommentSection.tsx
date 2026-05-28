@@ -4,7 +4,7 @@ import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Reply, MessageCircle } from 'lucide-react';
+import { MessageSquare, Reply, MessageCircle, X, ChevronUp } from 'lucide-react';
 import type { Comment } from '@/types';
 
 function getAvatarFallback(name: string): string {
@@ -129,6 +129,7 @@ export default function CommentSection({ nodeId }: Props) {
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [collapsedReplies, setCollapsedReplies] = useState<Set<string>>(new Set());
+  const [showEditor, setShowEditor] = useState(false);
 
   const loadComments = async () => {
     try {
@@ -164,8 +165,21 @@ export default function CommentSection({ nodeId }: Props) {
 
   const handleReply = (parentId: string) => {
     setReplyTo(parentId);
-    // Focus on textarea
-    document.querySelector('textarea')?.focus();
+    setShowEditor(true);
+    // Focus on textarea after a short delay to ensure the editor is visible
+    setTimeout(() => {
+      document.querySelector('textarea')?.focus();
+    }, 100);
+  };
+
+  const toggleEditor = () => {
+    setShowEditor(prev => !prev);
+    if (!showEditor) {
+      // When opening the editor, focus on textarea after a short delay
+      setTimeout(() => {
+        document.querySelector('textarea')?.focus();
+      }, 100);
+    }
   };
 
   const toggleReplies = (commentId: string) => {
@@ -206,47 +220,6 @@ export default function CommentSection({ nodeId }: Props) {
         </p>
       </div>
 
-      {/* Comment Input */}
-      <div className="border-b p-4">
-        {replyTo && (
-          <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Replying to comment</span>
-            <button
-              className="text-primary hover:underline"
-              onClick={() => setReplyTo(null)}
-            >
-              Cancel
-            </button>
-          </div>
-        )}
-
-        <div className="mb-3">
-          <Input
-            placeholder="Your nickname"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-            className="mb-2 bg-input"
-          />
-          <Textarea
-            placeholder={replyTo ? 'Write your reply...' : 'Add a comment...'}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-[100px] resize-none bg-input"
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            size="sm"
-            onClick={handleSubmit}
-            disabled={submitting || !nickname.trim() || !content.trim()}
-            className="h-8 text-xs"
-          >
-            {submitting ? 'Posting...' : replyTo ? 'Post reply' : 'Post comment'}
-          </Button>
-        </div>
-      </div>
-
       {/* Comments List */}
       <div className="divide-y">
         {topLevel.map(comment => {
@@ -268,6 +241,83 @@ export default function CommentSection({ nodeId }: Props) {
           <p className="text-xs text-muted-foreground text-center py-8">No comments yet</p>
         )}
       </div>
+
+      {/* Comment Editor - Bottom Section */}
+      {showEditor ? (
+        <div className="border-t bg-muted/30 animate-in slide-in-from-bottom duration-300">
+          {/* Editor Header */}
+          <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/50">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              <h3 className="text-sm font-medium">{replyTo ? 'Reply to Comment' : 'Add a Comment'}</h3>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0"
+              onClick={() => {
+                setShowEditor(false);
+                setReplyTo(null);
+              }}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+
+          {/* Editor Content */}
+          <div className="p-4">
+            {replyTo && (
+              <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-1.5 rounded">
+                <span>Replying to comment</span>
+                <button
+                  className="text-primary hover:underline"
+                  onClick={() => setReplyTo(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            <div className="mb-3">
+              <Input
+                placeholder="Your nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                className="mb-2 bg-input"
+              />
+              <Textarea
+                placeholder={replyTo ? 'Write your reply...' : 'Add a comment...'}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-[100px] resize-none bg-input"
+              />
+            </div>
+
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                onClick={handleSubmit}
+                disabled={submitting || !nickname.trim() || !content.trim()}
+                className="h-8 text-xs"
+              >
+                {submitting ? 'Posting...' : replyTo ? 'Post reply' : 'Post comment'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Floating Action Button - Within Container */
+        <div className="p-4 flex justify-center">
+          <Button
+            onClick={toggleEditor}
+            size="lg"
+            className="rounded-full shadow-md gap-2 px-6 h-10"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="font-medium">{comments.length === 0 ? 'Add Comment' : 'Write Comment'}</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
