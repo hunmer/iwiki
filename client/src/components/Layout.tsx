@@ -22,7 +22,7 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background animate-fade-in">
+    <div className="h-[100dvh] flex flex-col bg-background animate-fade-in overflow-hidden">
       <header className="h-12 bg-dark-surface border-b border-charcoal flex items-center px-4 gap-2 shrink-0 z-[100]">
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="text-foreground hover:text-primary">
           <Menu className="h-4 w-4" />

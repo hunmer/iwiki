@@ -19,15 +19,15 @@ export default function WikiPage() {
 
   return (
     <>
-      <div className={cn('border-r overflow-auto shrink-0 transition-all', sidebarCollapsed ? 'w-0' : 'w-64')}>
+      <div className={cn('border-r overflow-y-auto overflow-x-hidden shrink-0 transition-all', sidebarCollapsed ? 'w-0' : 'w-64')}>
         {!sidebarCollapsed && <DocTree />}
       </div>
-      <div className="flex-1 flex overflow-auto">
-        <div className="flex-[3] overflow-auto border-r">
+      <div className="flex-1 flex overflow-hidden">
+        <div className="flex-[3] overflow-y-auto overflow-x-hidden border-r">
           <DocContent nodeId={id || null} onEditingChange={setIsEditing} />
         </div>
         {id && !isEditing && (
-          <div className="flex-[2] overflow-auto">
+          <div className="flex-[2] overflow-y-auto overflow-x-hidden">
             <CommentSection nodeId={id} />
           </div>
         )}

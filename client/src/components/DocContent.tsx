@@ -50,12 +50,14 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const handleStartEditTitle = () => {
     setTempTitle(title);
     setEditingTitle(true);
+    setEditMode(true);
     setTimeout(() => titleInputRef.current?.focus(), 0);
   };
 
   const handleCancelEditTitle = () => {
     setTempTitle(title);
     setEditingTitle(false);
+    setEditMode(false);
   };
 
   const handleSaveTitle = async () => {
@@ -64,10 +66,12 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
       await renameNode(nodeId, tempTitle);
       setTitle(tempTitle);
       setEditingTitle(false);
+      setEditMode(false);
     } catch (error) {
       console.error('保存标题失败:', error);
       setTempTitle(title);
       setEditingTitle(false);
+      setEditMode(false);
     }
   };
 
@@ -135,32 +139,6 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
             )}
           </div>
         )}
-      </div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          {isAuthenticated && (
-            <>
-              {editMode ? (
-                <>
-                  <span className="text-xs text-green-600">● 编辑中</span>
-                  <button
-                    onClick={() => setEditMode(false)}
-                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    完成编辑
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setEditMode(true)}
-                  className="text-xs text-primary hover:underline transition-colors"
-                >
-                  进入编辑模式
-                </button>
-              )}
-            </>
-          )}
-        </div>
       </div>
       <Editor
         key={nodeId}
