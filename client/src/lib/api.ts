@@ -18,6 +18,18 @@ function toDocNode(raw: any): DocNode {
   };
 }
 
+/** 将 snake_case 的 API 响应转换为 camelCase 的 Comment */
+function toComment(raw: any): Comment {
+  return {
+    id: raw.id,
+    nodeId: raw.node_id ?? raw.nodeId ?? '',
+    parentId: raw.parent_id ?? raw.parentId ?? null,
+    nickname: raw.nickname,
+    content: raw.content,
+    createdAt: raw.created_at ?? raw.createdAt ?? 0,
+  };
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     credentials: 'include',
@@ -66,11 +78,11 @@ export const api = {
     request<{ success: boolean }>(`/nodes/${nodeId}/versions/restore`, {
       method: 'POST', body: JSON.stringify({ versionId }),
     }),
-  getComments: (nodeId: string) => request<Comment[]>(`/nodes/${nodeId}/comments`),
-  createComment: (nodeId: string, data: { nickname: string; content: string; parentId?: string }) =>
-    request<Comment>(`/nodes/${nodeId}/comments`, {
+  getComments: async (nodeId: string) => (await request<any[]>(`/nodes/${nodeId}/comments`)).map(toComment),
+  createComment: async (nodeId: string, data: { nickname: string; content: string; parentId?: string }) =>
+    toComment(await request<any>(`/nodes/${nodeId}/comments`, {
       method: 'POST', body: JSON.stringify(data),
-    }),
+    })),
   deleteComment: (nodeId: string, commentId: string) =>
     request<{ success: boolean }>(`/nodes/${nodeId}/comments/${commentId}`, { method: 'DELETE' }),
   getVectorStats: () => request<any>('/vector/stats'),

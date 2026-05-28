@@ -13,9 +13,11 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [editingTitle, setEditingTitle] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const [tempTitle, setTempTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
+  const renameNode = useWikiStore((s) => s.renameNode);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -32,13 +34,13 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
 
   useEffect(() => {
     if (onEditingChange) {
-      onEditingChange(editingTitle);
+      onEditingChange(editingTitle || editMode);
     }
-  }, [editingTitle, onEditingChange]);
+  }, [editingTitle, editMode, onEditingChange]);
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
-    if (!nodeId || !isAuthenticated) return;
+    if (!nodeId || !isAuthenticated || !editMode) return;
     clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       api.updateContent(nodeId, newContent);
@@ -59,7 +61,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const handleSaveTitle = async () => {
     if (!nodeId || !isAuthenticated) return;
     try {
-      await api.updateTitle(nodeId, tempTitle);
+      await renameNode(nodeId, tempTitle);
       setTitle(tempTitle);
       setEditingTitle(false);
     } catch (error) {
@@ -134,10 +136,36 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
           </div>
         )}
       </div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          {isAuthenticated && (
+            <>
+              {editMode ? (
+                <>
+                  <span className="text-xs text-green-600">● 编辑中</span>
+                  <button
+                    onClick={() => setEditMode(false)}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    完成编辑
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="text-xs text-primary hover:underline transition-colors"
+                >
+                  进入编辑模式
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </div>
       <Editor
         key={nodeId}
         value={content}
-        readOnly={!isAuthenticated}
+        readOnly={!isAuthenticated || !editMode}
         onChange={handleContentChange}
       />
     </div>
