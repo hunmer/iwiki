@@ -9,7 +9,7 @@ const router = Router();
 router.get('/', (_req: AuthRequest, res: Response) => {
   const db = getDb();
   const nodes = db.prepare(
-    'SELECT id, parent_id, title, icon, type, sort_order, is_trash, created_at, updated_at FROM nodes ORDER BY sort_order ASC'
+    'SELECT id, parent_id, title, icon, type, tags, sort_order, is_trash, created_at, updated_at FROM nodes ORDER BY sort_order ASC'
   ).all();
   res.json(nodes);
 });
@@ -18,7 +18,7 @@ router.get('/', (_req: AuthRequest, res: Response) => {
 router.get('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const node = db.prepare(
-    'SELECT id, parent_id, title, icon, type, sort_order, is_trash, created_at, updated_at FROM nodes WHERE id = ?'
+    'SELECT id, parent_id, title, icon, type, tags, sort_order, is_trash, created_at, updated_at FROM nodes WHERE id = ?'
   ).get(req.params.id) as any;
 
   if (!node) {
@@ -76,7 +76,7 @@ router.put('/reorder', authMiddleware, (req: AuthRequest, res: Response) => {
 router.put('/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   const db = getDb();
   const now = Date.now();
-  const { title, icon, sortOrder, parentId, type } = req.body;
+  const { title, icon, sortOrder, parentId, type, tags } = req.body;
   const sets: string[] = [];
   const values: any[] = [];
 
@@ -85,6 +85,13 @@ router.put('/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   if (sortOrder !== undefined) { sets.push('sort_order = ?'); values.push(sortOrder); }
   if (parentId !== undefined) { sets.push('parent_id = ?'); values.push(parentId); }
   if (type !== undefined) { sets.push('type = ?'); values.push(type); }
+  if (tags !== undefined) {
+    const normalizedTags = Array.isArray(tags)
+      ? tags.filter((t: any) => typeof t === 'string')
+      : [];
+    sets.push('tags = ?');
+    values.push(JSON.stringify(normalizedTags));
+  }
 
   if (sets.length === 0) {
     res.status(400).json({ error: '无更新内容' });

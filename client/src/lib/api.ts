@@ -2,6 +2,18 @@ import type { DocNode, Comment, VectorSearchResult } from '@/types';
 
 const BASE = '/api';
 
+/** 防御性解析 tags 字段 */
+function parseTags(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.filter((t): t is string => typeof t === 'string');
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter((t): t is string => typeof t === 'string');
+    } catch { /* ignore */ }
+  }
+  return [];
+}
+
 /** 将 snake_case 的 API 响应转换为 camelCase 的 DocNode */
 function toDocNode(raw: any): DocNode {
   return {
@@ -10,6 +22,7 @@ function toDocNode(raw: any): DocNode {
     title: raw.title,
     icon: raw.icon,
     type: raw.type ?? 'doc',
+    tags: parseTags(raw.tags),
     sortOrder: raw.sort_order ?? raw.sortOrder ?? 0,
     isTrash: raw.is_trash ?? raw.isTrash ?? 0,
     createdAt: raw.created_at ?? raw.createdAt ?? 0,
@@ -54,7 +67,7 @@ export const api = {
   getNode: async (id: string) => toDocNode(await request<any>(`/nodes/${id}`)) as DocNode & { content: string },
   createNode: async (data: { title: string; parentId?: string | null; icon?: string; type?: 'folder' | 'doc' }) =>
     toDocNode(await request<any>('/nodes', { method: 'POST', body: JSON.stringify(data) })),
-  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type'>>) =>
+  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type' | 'tags'>>) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   updateTitle: (id: string, title: string) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify({ title }) }),

@@ -1,8 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { useWikiStore } from '@/stores/wiki';
 import Editor from '@/components/Editor';
 import EmojiPicker from '@/components/EmojiPicker';
+import { TagInput, type Tag } from '@/components/tag-input';
+import { Badge } from '@/components/ui/badge';
 import { FileText, Edit2, Check, X } from 'lucide-react';
 
 interface DocContentProps {
@@ -18,9 +20,11 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const [editMode, setEditMode] = useState(false);
   const [tempTitle, setTempTitle] = useState('');
   const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<Tag[]>([]);
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const renameNode = useWikiStore((s) => s.renameNode);
   const updateNode = useWikiStore((s) => s.updateNode);
+  const nodes = useWikiStore((s) => s.nodes);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const iconSaveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -33,6 +37,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
       setTitle(node.title);
       setIcon(node.icon);
       setTempTitle(node.title);
+      setTags((node.tags ?? []).map(t => ({ label: t, value: t })));
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [nodeId]);
@@ -97,6 +102,22 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     }, 500);
   };
 
+  const allTags = useMemo(() => {
+    const tagSet = new Map<string, Tag>();
+    for (const node of nodes) {
+      for (const t of node.tags ?? []) {
+        if (!tagSet.has(t)) tagSet.set(t, { label: t, value: t });
+      }
+    }
+    return Array.from(tagSet.values());
+  }, [nodes]);
+
+  const handleTagsChange = useCallback((nextTags: Tag[]) => {
+    if (!nodeId || !isAuthenticated) return;
+    setTags(nextTags);
+    updateNode(nodeId, { tags: nextTags.map(t => t.label) });
+  }, [nodeId, isAuthenticated, updateNode]);
+
   if (!nodeId) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-3 animate-fade-in">
@@ -109,7 +130,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   if (loading) return <div className="flex-1 p-8 text-muted-foreground animate-fade-in">加载中...</div>;
 
   return (
-    <div className="flex-1 overflow-auto p-8 animate-fade-in">
+    <div className="flex-1 flex flex-col min-h-0 p-8 animate-fade-in">
       <div className="flex items-start justify-between mb-6 gap-4">
         {editingTitle ? (
           <div className="flex items-center gap-2 flex-1">
@@ -164,6 +185,25 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
           </div>
         )}
       </div>
+      {isAuthenticated ? (
+        <TagInput
+          tags={tags}
+          setTags={handleTagsChange}
+          allTags={allTags}
+          placeholder="添加标签..."
+          className="mb-4"
+        />
+      ) : (
+        tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-4">
+            {tags.map(tag => (
+              <Badge key={tag.label} variant="secondary" className="text-xs">
+                {tag.label}
+              </Badge>
+            ))}
+          </div>
+        )
+      )}
       <Editor
         key={nodeId}
         value={content}

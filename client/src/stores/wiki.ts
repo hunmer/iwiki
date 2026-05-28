@@ -17,7 +17,7 @@ interface WikiState {
   deleteNode: (id: string) => Promise<void>;
   trashNode: (id: string, isTrash: boolean) => Promise<void>;
   renameNode: (id: string, title: string) => Promise<void>;
-  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type'>>) => Promise<void>;
+  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type' | 'tags'>>) => Promise<void>;
   moveNode: (id: string, parentId: string | null, sortOrder: number) => Promise<void>;
   batchReorderNodes: (moves: Array<{ id: string; parentId: string | null; sortOrder: number }>) => Promise<void>;
 }

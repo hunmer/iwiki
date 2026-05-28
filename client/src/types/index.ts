@@ -4,6 +4,7 @@ export interface DocNode {
   title: string;
   icon: string;
   type: 'folder' | 'doc';
+  tags: string[];
   sortOrder: number;
   isTrash: number;
   createdAt: number;

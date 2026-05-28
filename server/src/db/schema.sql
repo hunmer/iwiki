@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   icon TEXT DEFAULT '📄',
   type TEXT NOT NULL DEFAULT 'doc',
   sort_order INTEGER DEFAULT 0,
+  tags TEXT NOT NULL DEFAULT '[]',
   is_trash INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL,

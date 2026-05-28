@@ -28,6 +28,13 @@ export function getDb(): Database.Database {
     // 列已存在，忽略错误
   }
 
+  // 安全添加 tags 列（如果不存在）
+  try {
+    _db.exec("ALTER TABLE nodes ADD COLUMN tags TEXT NOT NULL DEFAULT '[]'");
+  } catch {
+    // 列已存在，忽略错误
+  }
+
   return _db;
 }
 
