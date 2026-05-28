@@ -9,7 +9,7 @@ const router = Router();
 router.get('/', (_req: AuthRequest, res: Response) => {
   const db = getDb();
   const nodes = db.prepare(
-    'SELECT id, parent_id, title, icon, sort_order, is_trash, created_at, updated_at FROM nodes ORDER BY sort_order ASC'
+    'SELECT id, parent_id, title, icon, type, sort_order, is_trash, created_at, updated_at FROM nodes ORDER BY sort_order ASC'
   ).all();
   res.json(nodes);
 });
@@ -18,7 +18,7 @@ router.get('/', (_req: AuthRequest, res: Response) => {
 router.get('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const node = db.prepare(
-    'SELECT id, parent_id, title, icon, sort_order, is_trash, created_at, updated_at FROM nodes WHERE id = ?'
+    'SELECT id, parent_id, title, icon, type, sort_order, is_trash, created_at, updated_at FROM nodes WHERE id = ?'
   ).get(req.params.id) as any;
 
   if (!node) {
@@ -34,15 +34,19 @@ router.post('/', authMiddleware, (req: AuthRequest, res: Response) => {
   const db = getDb();
   const id = uuid();
   const now = Date.now();
-  const { title = '', parentId = null, icon = '📄' } = req.body;
+  const { title = '', parentId = null, icon = '📄', type = 'doc' } = req.body;
 
   db.prepare(
-    `INSERT INTO nodes (id, parent_id, title, icon, sort_order, is_trash, created_at, updated_at)
-     VALUES (?, ?, ?, ?, 0, 0, ?, ?)`
-  ).run(id, parentId, title, icon, now, now);
+    `INSERT INTO nodes (id, parent_id, title, icon, type, sort_order, is_trash, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?)`
+  ).run(id, parentId, title, icon, type, now, now);
 
-  writeDocContent(id, '');
-  res.status(201).json({ id, parentId, title, icon, sortOrder: 0, isTrash: 0, createdAt: now, updatedAt: now });
+  // 只有文档类型才创建 .md 文件
+  if (type === 'doc') {
+    writeDocContent(id, '');
+  }
+
+  res.status(201).json({ id, parentId, title, icon, type, sortOrder: 0, isTrash: 0, createdAt: now, updatedAt: now });
 });
 
 // Batch reorder nodes
@@ -72,7 +76,7 @@ router.put('/reorder', authMiddleware, (req: AuthRequest, res: Response) => {
 router.put('/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   const db = getDb();
   const now = Date.now();
-  const { title, icon, sortOrder, parentId } = req.body;
+  const { title, icon, sortOrder, parentId, type } = req.body;
   const sets: string[] = [];
   const values: any[] = [];
 
@@ -80,6 +84,7 @@ router.put('/:id', authMiddleware, (req: AuthRequest, res: Response) => {
   if (icon !== undefined) { sets.push('icon = ?'); values.push(icon); }
   if (sortOrder !== undefined) { sets.push('sort_order = ?'); values.push(sortOrder); }
   if (parentId !== undefined) { sets.push('parent_id = ?'); values.push(parentId); }
+  if (type !== undefined) { sets.push('type = ?'); values.push(type); }
 
   if (sets.length === 0) {
     res.status(400).json({ error: '无更新内容' });
@@ -101,9 +106,14 @@ router.put('/:id/content', authMiddleware, (req: AuthRequest, res: Response) => 
   const nodeId = req.params.id;
   const now = Date.now();
 
-  const node = db.prepare('SELECT id FROM nodes WHERE id = ?').get(nodeId) as any;
+  const node = db.prepare('SELECT id, type FROM nodes WHERE id = ?').get(nodeId) as any;
   if (!node) {
     res.status(404).json({ error: '文档不存在' });
+    return;
+  }
+
+  if (node.type === 'folder') {
+    res.status(400).json({ error: '文件夹不能编辑内容' });
     return;
   }
 

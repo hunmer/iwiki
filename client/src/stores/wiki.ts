@@ -13,7 +13,7 @@ interface WikiState {
   setActiveId: (id: string | null) => void;
   checkAuth: () => Promise<void>;
   toggleSidebar: () => void;
-  createNode: (title: string, parentId?: string | null) => Promise<string | null>;
+  createNode: (title: string, parentId?: string | null, type?: 'folder' | 'doc') => Promise<string | null>;
   deleteNode: (id: string) => Promise<void>;
   trashNode: (id: string, isTrash: boolean) => Promise<void>;
   renameNode: (id: string, title: string) => Promise<void>;
@@ -51,9 +51,9 @@ export const useWikiStore = create<WikiState>((set, get) => ({
 
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
-  createNode: async (title, parentId = null) => {
+  createNode: async (title, parentId = null, type = 'doc') => {
     try {
-      const node = await api.createNode({ title, parentId });
+      const node = await api.createNode({ title, parentId, type });
       set((s) => ({ nodes: [...s.nodes, node] }));
       return node.id;
     } catch {

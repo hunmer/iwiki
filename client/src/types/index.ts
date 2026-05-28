@@ -3,6 +3,7 @@ export interface DocNode {
   parentId: string | null;
   title: string;
   icon: string;
+  type: 'folder' | 'doc';
   sortOrder: number;
   isTrash: number;
   createdAt: number;

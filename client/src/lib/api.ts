@@ -9,6 +9,7 @@ function toDocNode(raw: any): DocNode {
     parentId: raw.parent_id ?? raw.parentId ?? null,
     title: raw.title,
     icon: raw.icon,
+    type: raw.type ?? 'doc',
     sortOrder: raw.sort_order ?? raw.sortOrder ?? 0,
     isTrash: raw.is_trash ?? raw.isTrash ?? 0,
     createdAt: raw.created_at ?? raw.createdAt ?? 0,
@@ -39,9 +40,9 @@ export const api = {
   checkAuth: () => request<{ authenticated: boolean }>('/auth/check'),
   getNodes: async () => (await request<any[]>('/nodes')).map(toDocNode),
   getNode: async (id: string) => toDocNode(await request<any>(`/nodes/${id}`)) as DocNode & { content: string },
-  createNode: async (data: { title: string; parentId?: string | null; icon?: string }) =>
+  createNode: async (data: { title: string; parentId?: string | null; icon?: string; type?: 'folder' | 'doc' }) =>
     toDocNode(await request<any>('/nodes', { method: 'POST', body: JSON.stringify(data) })),
-  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId'>>) =>
+  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type'>>) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   updateTitle: (id: string, title: string) =>
     request<{ success: boolean }>(`/nodes/${id}`, { method: 'PUT', body: JSON.stringify({ title }) }),

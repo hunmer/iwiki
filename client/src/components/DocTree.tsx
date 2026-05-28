@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen } from 'lucide-react';
 import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import type { DocNode } from '@/types';
 import { useHeTree, sortFlatData } from 'he-tree-react';
@@ -18,6 +19,9 @@ function isDescendant(nodeId: string, targetId: string, nodes: DocNode[]): boole
   }
   return false;
 }
+
+// Helper function to check if a node is a folder
+const isFolder = (node: DocNode) => node.type === 'folder';
 
 export default function DocTree() {
   const nodes = useWikiStore((s) => s.nodes);
@@ -84,10 +88,13 @@ export default function DocTree() {
   // Check if a node can be dragged (only authenticated users)
   const canDrag = () => isAuthenticated;
 
-  // Check if a node can be dropped (prevent circular dependencies)
+  // Check if a node can be dropped (prevent circular dependencies and only allow dropping into folders)
   const canDrop = ({ node }: any) => {
     if (!draggingNodeId) return true;
-    return !isDescendant(draggingNodeId, node.id, flatData);
+    // Prevent circular dependencies
+    if (isDescendant(draggingNodeId, node.id, flatData)) return false;
+    // Only allow dropping into folders
+    return isFolder(node);
   };
 
   const { renderTree } = useHeTree<DocNode>({
@@ -105,6 +112,7 @@ export default function DocTree() {
       const hasChildren = flatData.some(n => n.parentId === node.id);
       const isActive = activeId === node.id;
       const isRenaming = renamingId === node.id;
+      const isFolderNode = isFolder(node);
 
       const handleRename = async () => {
         if (renamingValue.trim()) {
@@ -115,6 +123,11 @@ export default function DocTree() {
       };
 
       const handleClick = () => {
+        // 文件夹只切换展开/折叠，不跳转到编辑页面
+        if (isFolderNode) {
+          toggleOpen();
+          return;
+        }
         const store = useWikiStore.getState();
         store.setActiveId(node.id);
         navigate(`/docs/${node.id}`);
@@ -128,7 +141,7 @@ export default function DocTree() {
 
       const handleCreateChild = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        const id = await createNode('', node.id);
+        const id = await createNode('', node.id, 'doc');
         if (id) {
           navigate(`/docs/${id}`);
         }
@@ -171,7 +184,7 @@ export default function DocTree() {
           )}
 
           {/* Expand/collapse arrow */}
-          {hasChildren ? (
+          {(hasChildren || isFolderNode) ? (
             <button
               onClick={(e) => { e.stopPropagation(); toggleOpen(); }}
               className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
@@ -183,7 +196,15 @@ export default function DocTree() {
           )}
 
           {/* Node icon */}
-          <span className="shrink-0">{node.icon}</span>
+          {isFolderNode ? (
+            isOpen && hasChildren ? (
+              <FolderOpen className="h-4 w-4 text-amber-500" />
+            ) : (
+              <Folder className="h-4 w-4 text-amber-500" />
+            )
+          ) : (
+            <span className="shrink-0">{node.icon}</span>
+          )}
 
           {/* Node title or rename input */}
           {isRenaming ? (
@@ -205,13 +226,15 @@ export default function DocTree() {
           {/* Action buttons (visible on hover) */}
           {isAuthenticated && !isRenaming && (
             <span className="hidden group-hover:flex gap-0.5">
-              <button
-                className="p-0.5 hover:text-primary rounded transition-colors"
-                onClick={handleCreateChild}
-                title="新建子文档"
-              >
-                <Plus className="h-3 w-3" />
-              </button>
+              {isFolderNode && (
+                <button
+                  className="p-0.5 hover:text-primary rounded transition-colors"
+                  onClick={handleCreateChild}
+                  title="新建子文档"
+                >
+                  <Plus className="h-3 w-3" />
+                </button>
+              )}
               <button
                 className="p-0.5 hover:text-primary rounded transition-colors"
                 onClick={handleStartRename}
@@ -241,17 +264,33 @@ export default function DocTree() {
             文档
           </span>
           {isAuthenticated && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={async () => {
-                const id = await createNode('新建文档');
-                if (id) navigate(`/docs/${id}`);
-              }}
-              className="text-muted-foreground hover:text-primary"
-            >
-              <Plus className="h-3.5 w-3.5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  <MoreVertical className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuItem onClick={async () => {
+                  const id = await createNode('新建文件夹', null, 'folder');
+                  if (id) navigate(`/docs/${id}`);
+                }}>
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                  新增文件夹
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={async () => {
+                  const id = await createNode('新建文档', null, 'doc');
+                  if (id) navigate(`/docs/${id}`);
+                }}>
+                  <FilePlus className="h-4 w-4 mr-2" />
+                  新增文档
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>

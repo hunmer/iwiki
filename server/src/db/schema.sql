@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS nodes (
   parent_id TEXT,
   title TEXT NOT NULL DEFAULT '',
   icon TEXT DEFAULT '📄',
+  type TEXT NOT NULL DEFAULT 'doc',
   sort_order INTEGER DEFAULT 0,
   is_trash INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL,

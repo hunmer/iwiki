@@ -21,6 +21,13 @@ export function getDb(): Database.Database {
   const schema = fs.readFileSync(path.resolve(__dirname, 'schema.sql'), 'utf8');
   _db.exec(schema);
 
+  // 安全添加 type 列（如果不存在）
+  try {
+    _db.exec("ALTER TABLE nodes ADD COLUMN type TEXT NOT NULL DEFAULT 'doc'");
+  } catch {
+    // 列已存在，忽略错误
+  }
+
   return _db;
 }
 
