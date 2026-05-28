@@ -17,6 +17,7 @@ interface WikiState {
   deleteNode: (id: string) => Promise<void>;
   trashNode: (id: string, isTrash: boolean) => Promise<void>;
   renameNode: (id: string, title: string) => Promise<void>;
+  updateNode: (id: string, data: Partial<Pick<DocNode, 'title' | 'icon' | 'sortOrder' | 'parentId' | 'type'>>) => Promise<void>;
   moveNode: (id: string, parentId: string | null, sortOrder: number) => Promise<void>;
   batchReorderNodes: (moves: Array<{ id: string; parentId: string | null; sortOrder: number }>) => Promise<void>;
 }
@@ -88,6 +89,13 @@ export const useWikiStore = create<WikiState>((set, get) => ({
     await api.updateNode(id, { title });
     set((s) => ({
       nodes: s.nodes.map(n => n.id === id ? { ...n, title } : n),
+    }));
+  },
+
+  updateNode: async (id, data) => {
+    await api.updateNode(id, data);
+    set((s) => ({
+      nodes: s.nodes.map(n => n.id === id ? { ...n, ...data } : n),
     }));
   },
 

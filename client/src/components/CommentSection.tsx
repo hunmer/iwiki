@@ -40,8 +40,8 @@ function CommentItem({ comment, onReply, onDelete, replies = [], collapsed, onTo
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
 
   return (
-    <div className="p-4">
-      <div className="flex gap-3">
+    <div>
+      <div className="group flex gap-3 bg-background rounded-lg shadow-sm border border-border/50 p-2.5">
         {/* Avatar */}
         <span className="relative flex overflow-hidden rounded-full select-none size-8 shrink-0 bg-muted">
           <span className="bg-muted text-muted-foreground flex size-full items-center justify-center rounded-full text-xs">
@@ -51,59 +51,61 @@ function CommentItem({ comment, onReply, onDelete, replies = [], collapsed, onTo
 
         <div className="min-w-0 flex-1">
           {/* User info */}
-          <div className="flex items-baseline gap-2">
-            <span className="text-sm font-medium">{comment.nickname}</span>
-            <span className="text-xs text-muted-foreground">
-              {formatTimeAgo(new Date(comment.createdAt))}
-            </span>
+          <div className="flex items-baseline justify-between gap-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-sm font-medium">{comment.nickname}</span>
+              <span className="text-xs text-muted-foreground">
+                {formatTimeAgo(new Date(comment.createdAt))}
+              </span>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 px-2 text-xs"
+                onClick={() => onReply(comment.id)}
+              >
+                <Reply className="size-3" />
+                Reply
+              </Button>
+
+              {comment.parentId === undefined && replyCount !== undefined && replyCount > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 px-2 text-xs"
+                  onClick={onToggleCollapse}
+                >
+                  <MessageCircle className="size-3" />
+                  {collapsed ? 'Show' : 'Hide'} {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+                </Button>
+              )}
+
+              {isAuthenticated && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 px-2 text-xs text-destructive hover:text-destructive"
+                  onClick={() => onDelete(comment.id)}
+                >
+                  Delete
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Comment content */}
           <p className="mt-1 text-sm leading-relaxed text-foreground whitespace-pre-wrap">
             {comment.content}
           </p>
-
-          {/* Actions */}
-          <div className="mt-2 flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 gap-1 px-2 text-xs"
-              onClick={() => onReply(comment.id)}
-            >
-              <Reply className="size-3" />
-              Reply
-            </Button>
-
-            {comment.parentId === undefined && replyCount !== undefined && replyCount > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 gap-1 px-2 text-xs"
-                onClick={onToggleCollapse}
-              >
-                <MessageCircle className="size-3" />
-                {collapsed ? 'Show' : 'Hide'} {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
-              </Button>
-            )}
-
-            {isAuthenticated && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 gap-1 px-2 text-xs text-destructive hover:text-destructive"
-                onClick={() => onDelete(comment.id)}
-              >
-                Delete
-              </Button>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Nested replies */}
       {!collapsed && replies.length > 0 && (
-        <div className="mt-3 pl-8 pt-3 border-l border-muted">
+        <div className="mt-2 pl-6 pt-2 space-y-2">
           {replies.map(reply => (
             <CommentItem
               key={reply.id}
@@ -208,7 +210,7 @@ export default function CommentSection({ nodeId }: Props) {
   const topLevel = comments.filter(c => !c.parentId);
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
+    <div className="overflow-hidden rounded-lg bg-card">
       {/* Header */}
       <div className="border-b px-4 py-3">
         <h2 className="text-sm font-medium flex items-center gap-2">
@@ -221,7 +223,7 @@ export default function CommentSection({ nodeId }: Props) {
       </div>
 
       {/* Comments List */}
-      <div className="divide-y">
+      <div className="p-3 space-y-2">
         {topLevel.map(comment => {
           const replies = commentsByParentId[comment.id] || [];
           return (
@@ -238,13 +240,13 @@ export default function CommentSection({ nodeId }: Props) {
           );
         })}
         {comments.length === 0 && (
-          <p className="text-xs text-muted-foreground text-center py-8">No comments yet</p>
+          <p className="text-xs text-muted-foreground text-center py-4">No comments yet</p>
         )}
       </div>
 
       {/* Comment Editor - Bottom Section */}
       {showEditor ? (
-        <div className="border-t bg-muted/30 animate-in slide-in-from-bottom duration-300">
+        <div className="bg-background rounded-lg shadow-md border border-border/50 animate-in slide-in-from-bottom duration-300">
           {/* Editor Header */}
           <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/50">
             <div className="flex items-center gap-2">

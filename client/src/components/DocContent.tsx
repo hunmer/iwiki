@@ -20,6 +20,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const [loading, setLoading] = useState(false);
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const renameNode = useWikiStore((s) => s.renameNode);
+  const updateNode = useWikiStore((s) => s.updateNode);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const iconSaveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +93,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     setIcon(newIcon);
     clearTimeout(iconSaveTimerRef.current);
     iconSaveTimerRef.current = setTimeout(() => {
-      api.updateNode(nodeId, { icon: newIcon });
+      updateNode(nodeId, { icon: newIcon });
     }, 500);
   };
 
