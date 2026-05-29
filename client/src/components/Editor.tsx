@@ -3,6 +3,7 @@ import { Crepe } from '@milkdown/crepe';
 import { commandsCtx } from '@milkdown/kit/core';
 import { clearTextInCurrentBlockCommand, htmlSchema } from '@milkdown/kit/preset/commonmark';
 import { insert } from '@milkdown/kit/utils';
+import { emoji } from '@milkdown/plugin-emoji';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
 
@@ -109,6 +110,7 @@ export default function Editor({ value, readOnly, onChange }: Props) {
         [Crepe.Feature.Toolbar]: true,
         [Crepe.Feature.BlockEdit]: true,
         [Crepe.Feature.ImageBlock]: true,
+        [Crepe.Feature.LinkTooltip]: true,
       },
       featureConfigs: {
         [Crepe.Feature.ImageBlock]: {
@@ -159,7 +161,11 @@ export default function Editor({ value, readOnly, onChange }: Props) {
       },
     });
 
+    // 使用自定义的 HTML schema 来支持视频渲染
     crepe.editor.use(renderableHtmlSchema);
+
+    // 启用 emoji 插件，支持 :smile: 快捷方式和 twemoji 渲染
+    emoji.forEach((plugin) => crepe.editor.use(plugin));
 
     crepe.on((api) => {
       api.markdownUpdated((_ctx, markdown) => {
