@@ -1,22 +1,25 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useBlocker } from 'react-router-dom';
 import { useWikiStore } from '@/stores/wiki';
 
 /**
- * Navigation guard hook for traditional React Router (BrowserRouter + Routes).
+ * Navigation guard hook that blocks navigation when there are unsaved changes.
  *
- * This hook implements navigation blocking without using `useBlocker` (which requires data router).
- * It listens to location changes and temporarily redirects back when navigation is blocked.
+ * This hook uses React Router's `useBlocker` which requires a data router (createBrowserRouter).
+ * It intercepts navigation attempts and shows a confirmation dialog when the user tries to leave
+ * with unsaved changes.
  *
- * @returns {Object} { showDialog, onConfirm, onCancel }
+ * Also handles browser refresh/close via the beforeunload event.
  */
 export function useNavigationGuard() {
   const [showDialog, setShowDialog] = useState(false);
   const isDirty = useWikiStore((s) => s.isDirty);
-  const location = useLocation();
-  const navigate = useNavigate();
-  const currentPathRef = useRef<string>(location.pathname);
-  const targetPathRef = useRef<string | null>(null);
+
+  // React Router navigation blocker
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty && currentLocation.pathname !== nextLocation.pathname
+  );
 
   // beforeunload event listener for browser refresh/close protection
   useEffect(() => {
@@ -31,50 +34,30 @@ export function useNavigationGuard() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, []);
 
-  // Navigation guard for in-app route changes
+  // Show dialog when navigation is blocked
   useEffect(() => {
-    // Skip check if we just confirmed navigation (targetPathRef is set)
-    if (targetPathRef.current !== null) {
-      return;
-    }
-
-    // Check if user is trying to navigate away with unsaved changes
-    if (isDirty && location.pathname !== currentPathRef.current) {
-      // Navigation attempted - show dialog and remember target
-      targetPathRef.current = location.pathname;
+    if (blocker.state === 'blocked') {
       setShowDialog(true);
-
-      // Redirect back to current page to prevent the navigation
-      navigate(currentPathRef.current, { replace: true });
-
-      return;
+    } else if (blocker.state === 'proceeding') {
+      setShowDialog(false);
     }
+  }, [blocker.state]);
 
-    // No unsaved changes or same route - update current path
-    currentPathRef.current = location.pathname;
-  }, [location.pathname, isDirty, navigate]);
-
-  const onConfirm = useCallback(() => {
-    // User confirmed - proceed with pending navigation
-    const targetPath = targetPathRef.current;
-    targetPathRef.current = null;
-
-    // Clear dirty state
+  const handleProceed = () => {
+    // Clear dirty state before proceeding
     useWikiStore.getState().setDirty(false);
+    blocker.proceed?.();
+  };
+
+  const handleReset = () => {
+    blocker.reset?.();
     setShowDialog(false);
+  };
 
-    // Navigate to target path
-    if (targetPath && targetPath !== currentPathRef.current) {
-      currentPathRef.current = targetPath;
-      navigate(targetPath);
-    }
-  }, [navigate]);
-
-  const onCancel = useCallback(() => {
-    // User cancelled - stay on current page
-    targetPathRef.current = null;
-    setShowDialog(false);
-  }, []);
-
-  return { showDialog, onConfirm, onCancel };
+  return {
+    showDialog,
+    blockerState: blocker.state,
+    onProceed: handleProceed,
+    onReset: handleReset,
+  };
 }

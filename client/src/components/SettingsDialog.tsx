@@ -32,16 +32,40 @@ export default function SettingsDialog({ open, onOpenChange }: Props) {
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // 校验文件扩展名
     if (!file.name.toLowerCase().endsWith('.zip')) {
       toast.error('请选择 ZIP 文件');
       return;
     }
+
+    // 校验 MIME 类型
+    const allowedMimeTypes = ['application/zip', 'application/x-zip-compressed'];
+    if (!allowedMimeTypes.includes(file.type) && file.type !== '') {
+      toast.error('文件类型不正确，请选择 ZIP 文件');
+      return;
+    }
+
+    // 校验文件大小（200MB）
+    const maxSize = 200 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error('文件大小超过限制（最大 200MB）');
+      return;
+    }
+
     setImporting(true);
     try {
       const result = await api.importData(file);
-      toast.success(
-        `导入成功：新增 ${result.nodesAdded} 个文档节点、${result.versionsAdded} 个版本、${result.commentsAdded} 条评论、${result.docsAdded} 个文档文件、${result.uploadsAdded} 个上传文件`
-      );
+      const parts = [
+        result.nodesAdded > 0 ? `${result.nodesAdded} 个文档节点` : '',
+        result.versionsAdded > 0 ? `${result.versionsAdded} 个版本` : '',
+        result.commentsAdded > 0 ? `${result.commentsAdded} 条评论` : '',
+        result.embeddingsAdded > 0 ? `${result.embeddingsAdded} 个嵌入向量` : '',
+        result.docsAdded > 0 ? `${result.docsAdded} 个文档文件` : '',
+        result.uploadsAdded > 0 ? `${result.uploadsAdded} 个上传文件` : '',
+      ].filter(Boolean);
+
+      toast.success(`导入成功：新增 ${parts.join('、')}`);
       onOpenChange(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '导入失败';

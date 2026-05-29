@@ -3,11 +3,14 @@ import { Button } from '@/components/ui/button';
 
 interface UnsavedChangesDialogProps {
   open: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+  onProceed: () => void;
+  onReset: () => void;
 }
 
-export default function UnsavedChangesDialog({ open, onConfirm, onCancel }: UnsavedChangesDialogProps) {
+/**
+ * Confirmation dialog shown when user attempts to navigate away with unsaved changes.
+ */
+export default function UnsavedChangesDialog({ open, onProceed, onReset }: UnsavedChangesDialogProps) {
   return (
     <Dialog open={open}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
@@ -18,10 +21,10 @@ export default function UnsavedChangesDialog({ open, onConfirm, onCancel }: Unsa
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onReset}>
             继续编辑
           </Button>
-          <Button variant="default" onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <Button variant="default" onClick={onProceed} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             放弃更改并离开
           </Button>
         </DialogFooter>
