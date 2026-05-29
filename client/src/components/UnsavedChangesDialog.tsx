@@ -1,25 +1,13 @@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 
-interface BlockerFunctions {
-  reset: () => void;
-  proceed: () => void;
-}
-
 interface UnsavedChangesDialogProps {
   open: boolean;
-  blocker?: BlockerFunctions;
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
-export default function UnsavedChangesDialog({ open, blocker }: UnsavedChangesDialogProps) {
-  const handleContinueEditing = () => {
-    blocker?.reset();
-  };
-
-  const handleDiscardChanges = () => {
-    blocker?.proceed();
-  };
-
+export default function UnsavedChangesDialog({ open, onConfirm, onCancel }: UnsavedChangesDialogProps) {
   return (
     <Dialog open={open}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
@@ -30,10 +18,10 @@ export default function UnsavedChangesDialog({ open, blocker }: UnsavedChangesDi
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={handleContinueEditing}>
+          <Button variant="outline" onClick={onCancel}>
             继续编辑
           </Button>
-          <Button variant="default" onClick={handleDiscardChanges} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <Button variant="default" onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
             放弃更改并离开
           </Button>
         </DialogFooter>

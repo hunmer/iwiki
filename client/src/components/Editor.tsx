@@ -175,7 +175,7 @@ export default function Editor({ value, readOnly, onChange }: Props) {
     emoji.forEach((plugin) => crepe.editor.use(plugin));
 
     // 颜色高亮插件
-    crepe.editor.use(highlightRemarkPlugin[1]); // $remark returns [optionsCtx, plugin]
+    crepe.editor.use(highlightRemarkPlugin); // $remark returns a plugin array with optionsCtx built-in
     crepe.editor.use(markSchema);
     crepe.editor.use(markInputRule);
     crepe.editor.use(colorPickerTooltip);

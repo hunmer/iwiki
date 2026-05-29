@@ -19,7 +19,7 @@ export default function Layout() {
   const [tagManageOpen, setTagManageOpen] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { blocker, showDialog } = useNavigationGuard();
+  const { showDialog, onConfirm, onCancel } = useNavigationGuard();
 
   const handleLogout = async () => {
     await api.logout();
@@ -60,7 +60,7 @@ export default function Layout() {
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <TagManageDialog open={tagManageOpen} onOpenChange={setTagManageOpen} />
-      <UnsavedChangesDialog open={showDialog} blocker={blocker.state === 'blocked' ? blocker : undefined} />
+      <UnsavedChangesDialog open={showDialog} onConfirm={onConfirm} onCancel={onCancel} />
       <Inspector />
     </div>
   );
