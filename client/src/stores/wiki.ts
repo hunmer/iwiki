@@ -124,11 +124,7 @@ export const useWikiStore = create<WikiState>((set, _get) => ({
 
   batchReorderNodes: async (moves) => {
     await api.batchReorder(moves);
-    set((s) => ({
-      nodes: s.nodes.map((n) => {
-        const move = moves.find((m) => m.id === n.id);
-        return move ? { ...n, parentId: move.parentId, sortOrder: move.sortOrder } : n;
-      }),
-    }));
+    // 重新加载节点以确保前端状态与后端完全同步
+    await _get().loadNodes();
   },
 }));

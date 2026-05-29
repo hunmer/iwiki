@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen, Upload } from 'lucide-react';
 import { useWikiStore } from '@/stores/wiki';
@@ -45,8 +45,27 @@ export default function DocTree() {
   // Track dragging state to prevent circular drops
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
-  // Track which folders are open
-  const [openIds, setOpenIds] = useState<string[]>([]);
+  // Track which folders are open (默认展开所有文件夹)
+  const allFolderIds = useMemo(() => {
+    return flatData.filter(n => n.type === 'folder').map(n => n.id);
+  }, [flatData]);
+
+  // 使用初始值展开所有文件夹
+  const initialOpenIds = useMemo(() => allFolderIds, [allFolderIds]);
+  const [openIds, setOpenIds] = useState<string[]>(() => {
+    return nodes.filter(n => n.type === 'folder' && !n.isTrash).map(n => n.id);
+  });
+
+  // 当文件夹列表变化时，自动添加新文件夹到展开列表
+  useEffect(() => {
+    setOpenIds(prev => {
+      const newFolders = allFolderIds.filter(id => !prev.includes(id));
+      if (newFolders.length > 0) {
+        return [...prev, ...newFolders];
+      }
+      return prev;
+    });
+  }, [allFolderIds]);
 
   // Create file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,12 +145,24 @@ export default function DocTree() {
   // Check if a node can be dragged (only authenticated users)
   const canDrag = () => isAuthenticated;
 
-  // Check if a node can be dropped (prevent circular dependencies and only allow dropping into folders)
-  const canDrop = ({ node }: any) => {
-    if (!draggingNodeId) return true;
-    // Prevent circular dependencies
-    if (isDescendant(draggingNodeId, node.id, flatData)) return false;
-    // Only allow dropping into folders
+  // Check if a node can be dropped (prevent circular dependencies and allow sorting within same parent)
+  const canDrop = ({ node, dragNodeId }: any) => {
+    if (!dragNodeId) return true;
+    // Prevent circular dependencies (don't drop a node into its descendant)
+    if (isDescendant(dragNodeId, node.id, flatData)) return false;
+
+    const draggingNode = flatData.find(n => n.id === dragNodeId);
+    if (!draggingNode) return false;
+
+    // Get the dragging node's original parent to check if this is a same-parent reorder
+    const draggingNodeParentId = draggingNode.parentId;
+
+    // If the target is in the same parent as the dragging node, allow it (sorting within folder)
+    if (node.parentId === draggingNodeParentId) {
+      return true;
+    }
+
+    // Otherwise, only allow dropping into folders
     return isFolder(node);
   };
 
@@ -198,6 +229,13 @@ export default function DocTree() {
         e.stopPropagation();
         const id = await createNode('', node.id, 'doc');
         if (id) {
+          // 确保父节点展开，以便显示新创建的子文档
+          setOpenIds(prev => {
+            if (!prev.includes(node.id)) {
+              return [...prev, node.id];
+            }
+            return prev;
+          });
           navigate(`/docs/${id}`);
         }
       };
