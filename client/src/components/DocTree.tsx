@@ -97,7 +97,7 @@ export default function DocTree() {
     }
 
     // Assign new sortOrder values (0, 1, 2, ...) to each group
-    for (const [parentId, group] of parentGroups) {
+    for (const [_parentId, group] of parentGroups) {
       for (let i = 0; i < group.length; i++) {
         const node = group[i];
         const newSortOrder = i;

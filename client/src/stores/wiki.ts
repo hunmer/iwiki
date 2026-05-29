@@ -23,7 +23,7 @@ interface WikiState {
   batchReorderNodes: (moves: Array<{ id: string; parentId: string | null; sortOrder: number }>) => Promise<void>;
 }
 
-export const useWikiStore = create<WikiState>((set, get) => ({
+export const useWikiStore = create<WikiState>((set, _get) => ({
   nodes: [],
   activeId: null,
   isAuthenticated: false,

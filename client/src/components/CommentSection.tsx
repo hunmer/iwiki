@@ -4,7 +4,7 @@ import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Reply, MessageCircle, X, ChevronUp } from 'lucide-react';
+import { MessageSquare, Reply, MessageCircle, X } from 'lucide-react';
 import type { Comment } from '@/types';
 
 function getAvatarFallback(name: string): string {

@@ -193,3 +193,37 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(0 0% 30%);
 }
+
+/* 颜色高亮选择器样式 */
+.milkdown-color-picker {
+  display: none;
+  position: absolute;
+  z-index: 50;
+}
+
+.milkdown-color-picker[data-show="true"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.milkdown-color-picker input[type="color"] {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+
+/* 高亮标记在编辑器中的样式 */
+.milkdown mark {
+  border-radius: 2px;
+  padding: 1px 3px;
+}

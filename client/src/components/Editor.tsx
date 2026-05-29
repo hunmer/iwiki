@@ -2,10 +2,14 @@ import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
 import { commandsCtx } from '@milkdown/kit/core';
 import { clearTextInCurrentBlockCommand, htmlSchema } from '@milkdown/kit/preset/commonmark';
-import { insert } from '@milkdown/kit/utils';
+import { insert, $remark } from '@milkdown/kit/utils';
 import { emoji } from '@milkdown/plugin-emoji';
 import '@milkdown/crepe/theme/common/style.css';
 import '@milkdown/crepe/theme/frame.css';
+import { markSchema } from './editor-plugins/highlight-mark-schema';
+import { remarkMarkColor } from './editor-plugins/remark-mark-color';
+import { markInputRule } from './editor-plugins/highlight-input-rule';
+import { colorPickerTooltip, colorPickerTooltipConfig } from './editor-plugins/highlight-color-picker';
 
 interface Props {
   value: string;
@@ -48,6 +52,9 @@ const videoIcon = `
 function escapeHtmlAttr(value: string) {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
+
+// 创建 remark 插件包装
+const highlightRemarkPlugin = $remark('markColor', () => remarkMarkColor);
 
 const renderableHtmlSchema = htmlSchema.extendSchema((prev) => (ctx) => {
   const base = prev(ctx);
@@ -166,6 +173,15 @@ export default function Editor({ value, readOnly, onChange }: Props) {
 
     // 启用 emoji 插件，支持 :smile: 快捷方式和 twemoji 渲染
     emoji.forEach((plugin) => crepe.editor.use(plugin));
+
+    // 颜色高亮插件
+    crepe.editor.use(highlightRemarkPlugin);
+    crepe.editor.use(markSchema);
+    crepe.editor.use(markInputRule);
+    crepe.editor.use(colorPickerTooltip);
+
+    // 设置 tooltip 配置
+    crepe.editor.config(colorPickerTooltipConfig);
 
     crepe.on((api) => {
       api.markdownUpdated((_ctx, markdown) => {
