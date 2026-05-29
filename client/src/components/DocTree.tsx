@@ -292,14 +292,16 @@ export default function DocTree() {
           )}
 
           {/* Node icon */}
-          {isFolderNode ? (
+          {node.icon ? (
+            <span className="shrink-0">{node.icon}</span>
+          ) : isFolderNode ? (
             isOpen && hasChildren ? (
               <FolderOpen className="h-4 w-4 text-amber-500" />
             ) : (
               <Folder className="h-4 w-4 text-amber-500" />
             )
           ) : (
-            <span className="shrink-0">{node.icon}</span>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           )}
 
           {/* Node title or rename input */}

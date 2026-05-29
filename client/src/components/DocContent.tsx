@@ -21,6 +21,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const [tempTitle, setTempTitle] = useState('');
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>();
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const renameNode = useWikiStore((s) => s.renameNode);
   const updateNode = useWikiStore((s) => s.updateNode);
@@ -40,6 +41,7 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
       setIcon(node.icon);
       setTempTitle(node.title);
       setTags((node.tags ?? []).map(t => ({ label: t, value: t })));
+      setUpdatedAt(node.updatedAt);
       lastSavedContentRef.current = node.content || '';
       setDirty(false);
       setLoading(false);
@@ -165,18 +167,18 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   if (loading) return <div className="flex-1 p-8 text-muted-foreground animate-fade-in">加载中...</div>;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 p-8 animate-fade-in">
-      <div className="flex items-start justify-between mb-6 gap-4">
+    <div className="flex-1 flex flex-col min-h-0 p-8 pt-12 animate-fade-in">
+      <div className="flex items-start justify-between mb-6 gap-4 pr-28">
         {editingTitle ? (
           <div className="flex items-center gap-2 flex-1">
-            {icon && <span className="text-2xl">{icon}</span>}
+            {icon && <span className="text-xl">{icon}</span>}
             <input
               ref={titleInputRef}
               type="text"
               value={tempTitle}
               onChange={(e) => setTempTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
-              className="flex-1 text-[clamp(1.5rem,3vw,2.25rem)] font-bold text-foreground tracking-tight bg-transparent border-b-2 border-primary outline-none px-1"
+              className="flex-1 text-xl font-bold text-foreground tracking-tight bg-transparent border-b-2 border-primary outline-none px-1"
               placeholder="输入标题..."
             />
             <button
@@ -203,9 +205,9 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
               />
             )}
             {icon && !isAuthenticated && (
-              <span className="text-2xl mr-2">{icon}</span>
+              <span className="text-xl mr-2">{icon}</span>
             )}
-            <h1 className="text-[clamp(1.5rem,3vw,2.25rem)] font-bold text-foreground tracking-tight">
+            <h1 className="text-xl font-bold text-foreground tracking-tight">
               {title || '无标题'}
             </h1>
             {isAuthenticated && (
@@ -219,6 +221,15 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
             )}
           </div>
         )}
+        <div className="text-xs text-muted-foreground whitespace-nowrap">
+          {updatedAt && `最后编辑于 ${new Date(updatedAt).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}`}
+        </div>
       </div>
       {isAuthenticated && editMode ? (
         <TagInput
