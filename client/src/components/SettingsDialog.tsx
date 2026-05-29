@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import { Download, Upload, Loader2 } from 'lucide-react';
+import { Download, Upload, Loader2, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -83,45 +83,58 @@ export default function SettingsDialog({ open, onOpenChange }: Props) {
           <DialogTitle>设置</DialogTitle>
           <DialogDescription>导入和导出 iWiki 数据</DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="export" className="w-full">
-          <TabsList className="w-full">
-            <TabsTrigger value="export" className="flex-1">
-              <Download className="h-4 w-4 mr-1" /> 导出
-            </TabsTrigger>
-            <TabsTrigger value="import" className="flex-1">
-              <Upload className="h-4 w-4 mr-1" /> 导入
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="export" className="mt-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              将所有数据（文档、数据库、上传文件）打包为 ZIP 文件下载。
-            </p>
-            <Button onClick={handleExport} disabled={exporting} className="w-full">
-              {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
-              {exporting ? '导出中...' : '导出数据'}
-            </Button>
-          </TabsContent>
-          <TabsContent value="import" className="mt-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              上传 iWiki 导出的 ZIP 文件，新数据将合并到当前数据中（不会覆盖现有数据）。
-            </p>
-            <input
-              type="file"
-              accept=".zip"
-              ref={fileInputRef}
-              onChange={handleImport}
-              className="hidden"
-            />
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={importing}
-              className="w-full"
-            >
-              {importing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
-              {importing ? '导入中...' : '选择 ZIP 文件导入'}
-            </Button>
-          </TabsContent>
-        </Tabs>
+        <TooltipProvider>
+          <div className="space-y-6">
+            {/* 导出区域 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">导出数据</label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>将所有数据（文档、数据库、上传文件）打包为 ZIP 文件下载</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <Button onClick={handleExport} disabled={exporting} className="w-full">
+                {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Download className="h-4 w-4 mr-1" />}
+                {exporting ? '导出中...' : '导出数据'}
+              </Button>
+            </div>
+
+            {/* 导入区域 */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium">导入数据</label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>上传 iWiki 导出的 ZIP 文件，新数据将合并到当前数据中（不会覆盖现有数据）</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+              <input
+                type="file"
+                accept=".zip"
+                ref={fileInputRef}
+                onChange={handleImport}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importing}
+                className="w-full"
+              >
+                {importing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+                {importing ? '导入中...' : '选择 ZIP 文件导入'}
+              </Button>
+            </div>
+          </div>
+        </TooltipProvider>
       </DialogContent>
     </Dialog>
   );

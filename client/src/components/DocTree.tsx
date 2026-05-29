@@ -1,13 +1,16 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen, Upload } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen, Upload, Search, Tag as TagIcon, X } from 'lucide-react';
 import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupButton } from '@/components/ui/input-group';
 import { cn } from '@/lib/utils';
 import type { DocNode } from '@/types';
 import { useHeTree, sortFlatData } from 'he-tree-react';
+import { TagInput, type Tag } from '@/components/tag-input';
 
 // Helper function to check if targetId is a descendant of nodeId (prevents circular dependencies)
 function isDescendant(nodeId: string, targetId: string, nodes: DocNode[]): boolean {
@@ -32,11 +35,68 @@ export default function DocTree() {
   const activeId = useWikiStore((s) => s.activeId);
   const navigate = useNavigate();
 
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [tagPopoverOpen, setTagPopoverOpen] = useState(false);
+
+  // Get all unique tags from nodes
+  const allTags = useMemo(() => {
+    const tagsSet = new Set<string>();
+    nodes.forEach(node => {
+      node.tags?.forEach(tag => tagsSet.add(tag));
+    });
+    return Array.from(tagsSet).map(tag => ({ label: tag, value: tag }));
+  }, [nodes]);
+
   // Filter out trash nodes and sort data in tree order
   const flatData = useMemo(() => {
     const filtered = nodes.filter(n => !n.isTrash);
     return sortFlatData(filtered, { idKey: 'id', parentIdKey: 'parentId' });
   }, [nodes]);
+
+  // Filter nodes based on search query and selected tags
+  const filteredNodes = useMemo(() => {
+    if (!searchQuery && selectedTags.length === 0) {
+      return flatData;
+    }
+
+    const result = new Set<DocNode>();
+
+    flatData.forEach(node => {
+      // Check if node matches search query
+      const matchesSearch = !searchQuery ||
+        node.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Check if node matches selected tags
+      const matchesTags = selectedTags.length === 0 ||
+        selectedTags.every(tag => node.tags?.includes(tag.label));
+
+      if (matchesSearch && matchesTags) {
+        result.add(node);
+
+        // Add all parent folders to maintain tree structure
+        let current = node;
+        while (current.parentId) {
+          const parent = flatData.find(n => n.id === current.parentId);
+          if (parent) {
+            result.add(parent);
+            current = parent;
+          } else {
+            break;
+          }
+        }
+      }
+    });
+
+    return sortFlatData(Array.from(result), { idKey: 'id', parentIdKey: 'parentId' });
+  }, [flatData, searchQuery, selectedTags]);
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedTags([]);
+  };
 
   // Track which nodes are being renamed
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -65,6 +125,35 @@ export default function DocTree() {
       return prev;
     });
   }, [allFolderIds]);
+
+  // 当有筛选条件时，自动展开所有包含匹配节点的文件夹
+  useEffect(() => {
+    if (searchQuery || selectedTags.length > 0) {
+      const folderIdsToExpand = new Set<string>();
+
+      filteredNodes.forEach(node => {
+        // 如果是匹配的节点，展开所有其父级文件夹
+        let current = node;
+        while (current.parentId) {
+          const parent = filteredNodes.find(n => n.id === current.parentId);
+          if (parent && parent.type === 'folder') {
+            folderIdsToExpand.add(parent.id);
+            current = parent;
+          } else {
+            break;
+          }
+        }
+      });
+
+      setOpenIds(prev => {
+        const newFolders = Array.from(folderIdsToExpand).filter(id => !prev.includes(id));
+        if (newFolders.length > 0) {
+          return [...prev, ...newFolders];
+        }
+        return prev;
+      });
+    }
+  }, [searchQuery, selectedTags, filteredNodes]);
 
   // Create file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +255,7 @@ export default function DocTree() {
   };
 
   const { renderTree } = useHeTree<DocNode>({
-    data: flatData,
+    data: filteredNodes,
     dataType: 'flat',
     idKey: 'id',
     parentIdKey: 'parentId',
@@ -194,7 +283,7 @@ export default function DocTree() {
         });
       };
 
-      const hasChildren = flatData.some(n => n.parentId === node.id);
+      const hasChildren = filteredNodes.some(n => n.parentId === node.id);
       const isActive = activeId === node.id;
       const isRenaming = renamingId === node.id;
       const isFolderNode = isFolder(node);
@@ -364,6 +453,61 @@ export default function DocTree() {
         onChange={handleFileChange}
         className="hidden"
       />
+
+      {/* Search and Filter Section */}
+      <div className="p-3 border-b border-charcoal space-y-2">
+        {/* Search bar */}
+        <InputGroup>
+          <InputGroupAddon>
+            <Search className="h-3.5 w-3.5" />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="搜索文档..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {(searchQuery || selectedTags.length > 0) && (
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                size="icon-xs"
+                variant="ghost"
+                onClick={handleClearFilters}
+                className="h-5 w-5 p-0"
+              >
+                <X className="h-3 w-3" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          )}
+        </InputGroup>
+
+        {/* Tag filter */}
+        <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              size="xs"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                selectedTags.length > 0 && "border-primary text-primary"
+              )}
+            >
+              <TagIcon className="h-3.5 w-3.5 mr-2" />
+              {selectedTags.length > 0
+                ? `已选择 ${selectedTags.length} 个标签`
+                : '标签筛选'}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="p-2 w-64" align="start">
+            <TagInput
+              tags={selectedTags}
+              setTags={setSelectedTags}
+              allTags={allTags}
+              placeholder="搜索标签..."
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
+
       <div className="p-3 border-b border-charcoal">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -405,10 +549,12 @@ export default function DocTree() {
         </div>
       </div>
       <div className="flex-1 overflow-auto p-1">
-        {flatData.length > 0 ? (
+        {filteredNodes.length > 0 ? (
           renderTree()
         ) : (
-          <p className="text-xs text-muted-foreground p-4 text-center">暂无文档</p>
+          <p className="text-xs text-muted-foreground p-4 text-center">
+            {searchQuery || selectedTags.length > 0 ? '没有找到匹配的文档' : '暂无文档'}
+          </p>
         )}
       </div>
     </div>

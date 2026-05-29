@@ -1,12 +1,11 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogOut, LogIn, Terminal, Sun, Moon, Tags, Settings } from 'lucide-react';
+import { Menu, LogOut, LogIn, Terminal, Sun, Moon, Tags, Settings } from 'lucide-react';
 import { Inspector } from 'react-dev-inspector';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useWikiStore } from '@/stores/wiki';
 import { api } from '@/lib/api';
 import { useState } from 'react';
-import SearchDialog from '@/components/SearchDialog';
 import TagManageDialog from '@/components/TagManageDialog';
 import UnsavedChangesDialog from '@/components/UnsavedChangesDialog';
 import SettingsDialog from '@/components/SettingsDialog';
@@ -16,7 +15,6 @@ export default function Layout() {
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const checkAuth = useWikiStore((s) => s.checkAuth);
   const toggleSidebar = useWikiStore((s) => s.toggleSidebar);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [tagManageOpen, setTagManageOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
@@ -42,8 +40,6 @@ export default function Layout() {
           <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => setSearchOpen(true)} className="text-muted-foreground hover:text-primary">          <Search className="h-4 w-4 mr-1" /> 搜索
-        </Button>
         <Button variant="ghost" size="sm" onClick={() => setTagManageOpen(true)} className="text-muted-foreground hover:text-primary">
           <Tags className="h-4 w-4 mr-1" /> 标签
         </Button>
@@ -63,7 +59,6 @@ export default function Layout() {
       <div className="flex flex-1 overflow-hidden">
         <Outlet />
       </div>
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <TagManageDialog open={tagManageOpen} onOpenChange={setTagManageOpen} />
       <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
       <UnsavedChangesDialog open={showDialog} onProceed={onProceed} onReset={onReset} />

@@ -26,7 +26,7 @@ const MIME_EXT_MAP: Record<string, string[]> = {
 
 const ALLOWED_MIME_TYPES = new Set(Object.keys(MIME_EXT_MAP));
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
