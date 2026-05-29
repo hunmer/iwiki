@@ -23,8 +23,9 @@ class TooltipPluginView {
 
   currentMark: Mark | null = null;
 
-  listener = debounce((e: Event) => {
-    const color = (e.target as HTMLInputElement).value;
+  listener = debounce((e: unknown) => {
+    const color = (e as Event).target as HTMLInputElement;
+    const colorValue = color.value;
 
     const view = this.ctx.get(editorViewCtx);
     if (!view.state || !this.currentMark) return;
@@ -39,7 +40,7 @@ class TooltipPluginView {
 
     tr.removeMark(from, to, markType);
 
-    tr.addMark(from, to, markType.create({ color }));
+    tr.addMark(from, to, markType.create({ color: colorValue }));
 
     view.dispatch(tr);
   }, 20);
@@ -57,10 +58,9 @@ class TooltipPluginView {
     this.provider = new TooltipProvider({
       content: this.content,
       floatingUIOptions: {
-        placement: "right"
+        placement: "top"
       },
-      shouldShow: () => {
-        const view = ctx.get(editorViewCtx);
+      shouldShow: (view) => {
         if (!view.state) return false;
         const { doc, selection } = view.state;
         const { from, to } = selection;
