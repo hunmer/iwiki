@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import multer from 'multer';
-import archiver from 'archiver';
+import * as archiver from 'archiver';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import fs from 'fs';
@@ -14,6 +14,14 @@ import { getDb } from '../db';
 const router = Router();
 
 const MAX_IMPORT_SIZE = 200 * 1024 * 1024; // 200MB
+
+type ArchiverModule = typeof archiver & {
+  ZipArchive: new (options?: archiver.ArchiverOptions) => archiver.Archiver;
+};
+
+function createZipArchive(options: archiver.ArchiverOptions): archiver.Archiver {
+  return new (archiver as ArchiverModule).ZipArchive(options);
+}
 
 // 简单的内存速率限制器
 const importRateLimit = new Map<string, { count: number; resetTime: number }>();
@@ -134,7 +142,7 @@ router.get('/export', authMiddleware, (req: AuthRequest, res: Response) => {
   res.setHeader('Content-Type', 'application/zip');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
-  const archive = archiver('zip', {
+  const archive = createZipArchive({
     zlib: { level: 9 }, // 最高压缩级别
   });
 
@@ -173,21 +181,6 @@ router.get('/export', authMiddleware, (req: AuthRequest, res: Response) => {
   archive.finalize().catch((err) => {
     console.error('Archive finalize error:', err);
   });
-  if (fs.existsSync(DB_PATH)) {
-    archive.file(DB_PATH, { name: 'wiki.db' });
-  }
-
-  // 添加文档目录
-  if (fs.existsSync(DOCS_DIR)) {
-    archive.directory(DOCS_DIR, 'docs');
-  }
-
-  // 添加上传文件目录
-  if (fs.existsSync(UPLOADS_DIR)) {
-    archive.directory(UPLOADS_DIR, 'uploads');
-  }
-
-  archive.finalize();
 });
 
 // POST /api/data/import — 导入 ZIP 文件并合并数据
