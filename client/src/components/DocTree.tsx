@@ -50,8 +50,7 @@ export default function DocTree() {
     return flatData.filter(n => n.type === 'folder').map(n => n.id);
   }, [flatData]);
 
-  // 使用初始值展开所有文件夹
-  const initialOpenIds = useMemo(() => allFolderIds, [allFolderIds]);
+  // 初始化展开所有文件夹
   const [openIds, setOpenIds] = useState<string[]>(() => {
     return nodes.filter(n => n.type === 'folder' && !n.isTrash).map(n => n.id);
   });

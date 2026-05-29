@@ -8,11 +8,13 @@ interface WikiState {
   isAuthenticated: boolean;
   sidebarCollapsed: boolean;
   loading: boolean;
+  isDirty: boolean;
 
   loadNodes: () => Promise<void>;
   setActiveId: (id: string | null) => void;
   checkAuth: () => Promise<void>;
   toggleSidebar: () => void;
+  setDirty: (dirty: boolean) => void;
   createNode: (title: string, parentId?: string | null, type?: 'folder' | 'doc') => Promise<string | null>;
   createNodeWithContent: (title: string, content: string, parentId?: string | null, type?: 'folder' | 'doc') => Promise<string | null>;
   deleteNode: (id: string) => Promise<void>;
@@ -29,6 +31,7 @@ export const useWikiStore = create<WikiState>((set, _get) => ({
   isAuthenticated: false,
   sidebarCollapsed: false,
   loading: false,
+  isDirty: false,
 
   loadNodes: async () => {
     set({ loading: true });
@@ -52,6 +55,8 @@ export const useWikiStore = create<WikiState>((set, _get) => ({
   },
 
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+
+  setDirty: (dirty) => set({ isDirty: dirty }),
 
   createNode: async (title, parentId = null, type = 'doc') => {
     try {

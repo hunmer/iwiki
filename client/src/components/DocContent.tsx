@@ -25,9 +25,11 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
   const renameNode = useWikiStore((s) => s.renameNode);
   const updateNode = useWikiStore((s) => s.updateNode);
   const nodes = useWikiStore((s) => s.nodes);
+  const setDirty = useWikiStore((s) => s.setDirty);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const iconSaveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const lastSavedContentRef = useRef<string>('');
 
   useEffect(() => {
     if (!nodeId) return;
@@ -38,9 +40,11 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
       setIcon(node.icon);
       setTempTitle(node.title);
       setTags((node.tags ?? []).map(t => ({ label: t, value: t })));
+      lastSavedContentRef.current = node.content || '';
+      setDirty(false);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [nodeId]);
+  }, [nodeId, setDirty]);
 
   // 当nodes发生变化时，检查当前文档的标题是否被更新
   useEffect(() => {
@@ -69,10 +73,14 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
 
   const handleContentChange = (newContent: string) => {
     setContent(newContent);
+    const dirty = newContent !== lastSavedContentRef.current;
+    setDirty(dirty);
     if (!nodeId || !isAuthenticated || !editMode) return;
     clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = setTimeout(() => {
-      api.updateContent(nodeId, newContent);
+    saveTimerRef.current = setTimeout(async () => {
+      await api.updateContent(nodeId, newContent);
+      lastSavedContentRef.current = newContent;
+      setDirty(false);
     }, 2000);
   };
 
@@ -136,6 +144,14 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     setTags(nextTags);
     updateNode(nodeId, { tags: nextTags.map(t => t.label) });
   }, [nodeId, isAuthenticated, updateNode]);
+
+  // Cleanup: clear debounce timer and reset dirty state on unmount
+  useEffect(() => {
+    return () => {
+      clearTimeout(saveTimerRef.current);
+      setDirty(false);
+    };
+  }, [setDirty]);
 
   if (!nodeId) {
     return (

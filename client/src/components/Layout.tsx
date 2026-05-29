@@ -8,6 +8,8 @@ import { api } from '@/lib/api';
 import { useState } from 'react';
 import SearchDialog from '@/components/SearchDialog';
 import TagManageDialog from '@/components/TagManageDialog';
+import UnsavedChangesDialog from '@/components/UnsavedChangesDialog';
+import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 
 export default function Layout() {
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
@@ -17,6 +19,7 @@ export default function Layout() {
   const [tagManageOpen, setTagManageOpen] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { blocker, showDialog } = useNavigationGuard();
 
   const handleLogout = async () => {
     await api.logout();
@@ -57,6 +60,7 @@ export default function Layout() {
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <TagManageDialog open={tagManageOpen} onOpenChange={setTagManageOpen} />
+      <UnsavedChangesDialog open={showDialog} blocker={blocker.state === 'blocked' ? blocker : undefined} />
       <Inspector />
     </div>
   );
