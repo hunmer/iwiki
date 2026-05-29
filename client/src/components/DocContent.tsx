@@ -42,6 +42,25 @@ export default function DocContent({ nodeId, onEditingChange }: DocContentProps)
     }).catch(() => setLoading(false));
   }, [nodeId]);
 
+  // 当nodes发生变化时，检查当前文档的标题是否被更新
+  useEffect(() => {
+    if (!nodeId) return;
+    const currentNode = nodes.find(n => n.id === nodeId);
+    if (currentNode && currentNode.title !== title) {
+      setTitle(currentNode.title);
+      setTempTitle(currentNode.title);
+    }
+    if (currentNode && currentNode.icon !== icon) {
+      setIcon(currentNode.icon);
+    }
+    if (currentNode) {
+      const currentTags = (currentNode.tags ?? []).map(t => ({ label: t, value: t }));
+      if (JSON.stringify(currentTags) !== JSON.stringify(tags)) {
+        setTags(currentTags);
+      }
+    }
+  }, [nodes, nodeId]);
+
   useEffect(() => {
     if (onEditingChange) {
       onEditingChange(editingTitle || editMode);

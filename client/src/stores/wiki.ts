@@ -14,6 +14,7 @@ interface WikiState {
   checkAuth: () => Promise<void>;
   toggleSidebar: () => void;
   createNode: (title: string, parentId?: string | null, type?: 'folder' | 'doc') => Promise<string | null>;
+  createNodeWithContent: (title: string, content: string, parentId?: string | null, type?: 'folder' | 'doc') => Promise<string | null>;
   deleteNode: (id: string) => Promise<void>;
   trashNode: (id: string, isTrash: boolean) => Promise<void>;
   renameNode: (id: string, title: string) => Promise<void>;
@@ -62,6 +63,17 @@ export const useWikiStore = create<WikiState>((set, get) => ({
     }
   },
 
+  createNodeWithContent: async (title, content, parentId = null, type = 'doc') => {
+    try {
+      const node = await api.createNode({ title, parentId, type });
+      await api.updateContent(node.id, content);
+      set((s) => ({ nodes: [...s.nodes, node] }));
+      return node.id;
+    } catch {
+      return null;
+    }
+  },
+
   deleteNode: async (id) => {
     await api.deleteNode(id);
     set((s) => {
@@ -82,6 +94,8 @@ export const useWikiStore = create<WikiState>((set, get) => ({
     await api.trashNode(id, isTrash);
     set((s) => ({
       nodes: s.nodes.map(n => n.id === id ? { ...n, isTrash: isTrash ? 1 : 0 } : n),
+      // 如果恢复的是之前删除的文档，且之前没有活动的文档，设置为活动文档
+      activeId: !isTrash && !s.activeId ? id : s.activeId,
     }));
   },
 

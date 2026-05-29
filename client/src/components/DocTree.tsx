@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen } from 'lucide-react';
+import { ChevronRight, ChevronDown, Plus, Trash2, FileText, GripVertical, MoreVertical, FolderPlus, FilePlus, Folder, FolderOpen, Upload } from 'lucide-react';
 import { useWikiStore } from '@/stores/wiki';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ const isFolder = (node: DocNode) => node.type === 'folder';
 export default function DocTree() {
   const nodes = useWikiStore((s) => s.nodes);
   const createNode = useWikiStore((s) => s.createNode);
+  const createNodeWithContent = useWikiStore((s) => s.createNodeWithContent);
   const batchReorderNodes = useWikiStore((s) => s.batchReorderNodes);
   const isAuthenticated = useWikiStore((s) => s.isAuthenticated);
   const activeId = useWikiStore((s) => s.activeId);
@@ -43,6 +44,40 @@ export default function DocTree() {
 
   // Track dragging state to prevent circular drops
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+
+  // Create file input reference
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file import
+  const handleImportMd = async (file: File) => {
+    if (!file.name.endsWith('.md')) {
+      alert('请选择 .md 文件');
+      return;
+    }
+
+    const title = file.name.replace(/\.md$/, '');
+    const content = await file.text();
+
+    const id = await createNodeWithContent(title, content, null, 'doc');
+    if (id) {
+      navigate(`/docs/${id}`);
+    }
+  };
+
+  // Trigger file input click
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle file input change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImportMd(file);
+    }
+    // Reset input value to allow selecting the same file again
+    e.target.value = '';
+  };
 
   // Handle drag-and-drop data changes
   const handleChange = async (newData: DocNode[]) => {
@@ -150,6 +185,10 @@ export default function DocTree() {
       const handleDelete = async (e: React.MouseEvent) => {
         e.stopPropagation();
         const store = useWikiStore.getState();
+        // 如果删除的是当前活动的文档，导航到文档列表页
+        if (store.activeId === node.id) {
+          navigate('/docs');
+        }
         await store.trashNode(node.id, true);
       };
 
@@ -258,6 +297,14 @@ export default function DocTree() {
 
   return (
     <div className="h-full flex flex-col">
+      {/* Hidden file input for MD import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".md"
+        onChange={handleFileChange}
+        className="hidden"
+      />
       <div className="p-3 border-b border-charcoal">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -288,6 +335,10 @@ export default function DocTree() {
                 }}>
                   <FilePlus className="h-4 w-4 mr-2" />
                   新增文档
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleImportClick}>
+                  <Upload className="h-4 w-4 mr-2" />
+                  导入 MD 文件
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

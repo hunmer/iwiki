@@ -157,10 +157,10 @@ export function TagInput({
           </div>
         </div>
         {open && (
-          <div className="w-full">
+          <div className="w-full bg-popover rounded-md border shadow-md">
             <CommandList
               className={cn(
-                "bg-primary-foreground w-full rounded-md"
+                "w-full"
               )}
             >
               <CommandEmpty>未找到标签</CommandEmpty>
