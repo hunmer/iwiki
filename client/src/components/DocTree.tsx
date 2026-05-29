@@ -45,6 +45,9 @@ export default function DocTree() {
   // Track dragging state to prevent circular drops
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
 
+  // Track which folders are open
+  const [openIds, setOpenIds] = useState<string[]>([]);
+
   // Create file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -143,7 +146,24 @@ export default function DocTree() {
     canDrop,
     dragOpen: true,
     dragOpenDelay: 500,
-    renderNode: ({ node, level, isOpen, toggleOpen, isDragging, isPlaceholder }) => {
+    openIds,
+    renderNode: (stat) => {
+      const node = stat.node;
+      const level = stat.level;
+      const isOpen = stat.open;
+      const isPlaceholder = false;
+      const isDragging = draggingNodeId === node.id;
+
+      const toggleOpen = () => {
+        setOpenIds(prev => {
+          if (prev.includes(node.id)) {
+            return prev.filter(id => id !== node.id);
+          } else {
+            return [...prev, node.id];
+          }
+        });
+      };
+
       const hasChildren = flatData.some(n => n.parentId === node.id);
       const isActive = activeId === node.id;
       const isRenaming = renamingId === node.id;
@@ -158,14 +178,14 @@ export default function DocTree() {
       };
 
       const handleClick = () => {
-        // 文件夹只切换展开/折叠，不跳转到编辑页面
-        if (isFolderNode) {
-          toggleOpen();
-          return;
-        }
+        // 文件夹也跳转到编辑页面（文件夹本身也是一个页面）
         const store = useWikiStore.getState();
         store.setActiveId(node.id);
         navigate(`/docs/${node.id}`);
+        // 如果是文件夹，同时切换展开/折叠状态
+        if (isFolderNode) {
+          toggleOpen();
+        }
       };
 
       const handleStartRename = (e: React.MouseEvent) => {

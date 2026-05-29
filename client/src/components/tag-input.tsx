@@ -125,7 +125,7 @@ export function TagInput({
       <Command className={cn("rounded", className)}>
         <div
           className={cn(
-            "flex w-full items-center flex-wrap gap-2 border rounded-md p-2 hover:cursor-text"
+            "flex w-full items-center flex-wrap gap-2 p-2 hover:cursor-text"
           )}
           onClick={() => commandInput.current?.focus()}
         >

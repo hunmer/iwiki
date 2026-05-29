@@ -1,0 +1,180 @@
+{
+  "timestamp": "2026-05-29T11:48:58.000Z",
+  "project": "iwiki",
+  "rootClaude": "CLAUDE.md",
+  "modules": [
+    {
+      "name": "client",
+      "path": "client/",
+      "language": "TypeScript/React",
+      "claudeMd": "client/CLAUDE.md",
+      "entry": ["client/src/main.tsx", "client/src/App.tsx"],
+      "interfaces": ["client/src/lib/api.ts"],
+      "stateManagement": ["client/src/stores/wiki.ts"],
+      "types": ["client/src/types/index.ts"],
+      "pages": [
+        "client/src/pages/WikiPage.tsx",
+        "client/src/pages/LoginPage.tsx",
+        "client/src/pages/AdminPage.tsx"
+      ],
+      "components": [
+        "client/src/components/Layout.tsx",
+        "client/src/components/DocTree.tsx",
+        "client/src/components/DocContent.tsx",
+        "client/src/components/Editor.tsx",
+        "client/src/components/AiChat.tsx",
+        "client/src/components/SearchDialog.tsx",
+        "client/src/components/CommentSection.tsx",
+        "client/src/components/EmojiPicker.tsx",
+        "client/src/components/TagManageDialog.tsx",
+        "client/src/components/tag-input.tsx",
+        "client/src/components/slash-menu.ts",
+        "client/src/components/pill.tsx"
+      ],
+      "uiPrimitives": "client/src/components/ui/",
+      "testDir": null,
+      "configFiles": [
+        "client/vite.config.ts",
+        "client/tsconfig.json",
+        "client/tsconfig.app.json",
+        "client/tsconfig.node.json",
+        "client/eslint.config.js",
+        "client/components.json"
+      ],
+      "coverage": {
+        "entry": true,
+        "interfaces": true,
+        "state": true,
+        "components": true,
+        "tests": false,
+        "dataModels": true
+      }
+    },
+    {
+      "name": "server",
+      "path": "server/",
+      "language": "TypeScript/Node.js",
+      "claudeMd": "server/CLAUDE.md",
+      "entry": ["server/src/index.ts"],
+      "interfaces": [
+        "server/src/routes/auth.ts",
+        "server/src/routes/nodes.ts",
+        "server/src/routes/comments.ts",
+        "server/src/routes/tags.ts",
+        "server/src/routes/vector.ts",
+        "server/src/routes/chat.ts",
+        "server/src/routes/uploads.ts"
+      ],
+      "services": [
+        "server/src/services/vector.ts",
+        "server/src/services/chat.ts",
+        "server/src/services/llm.ts"
+      ],
+      "dataLayer": [
+        "server/src/db/index.ts",
+        "server/src/db/schema.sql"
+      ],
+      "middleware": ["server/src/middleware/auth.ts"],
+      "constants": ["server/src/constants.ts"],
+      "testDir": null,
+      "configFiles": [
+        "server/tsconfig.json",
+        "server/pnpm-workspace.yaml"
+      ],
+      "coverage": {
+        "entry": true,
+        "interfaces": true,
+        "services": true,
+        "dataLayer": true,
+        "middleware": true,
+        "tests": false,
+        "dataModels": true
+      }
+    }
+  ],
+  "docs": [
+    "docs/superpowers/specs/2026-05-27-iwiki-design.md",
+    "docs/superpowers/plans/2026-05-27-01-scaffolding.md",
+    "docs/superpowers/plans/2026-05-27-02-backend-core.md",
+    "docs/superpowers/plans/2026-05-27-03-backend-comments.md",
+    "docs/superpowers/plans/2026-05-27-04-backend-ai-vector.md",
+    "docs/superpowers/plans/2026-05-27-05-frontend-shell.md",
+    "docs/superpowers/plans/2026-05-27-06-frontend-editor-comments-admin.md"
+  ],
+  "coverage": {
+    "estimatedTotalFiles": 55,
+    "scannedFiles": 45,
+    "coveragePercent": 81.8,
+    "modulesCovered": 2,
+    "modulesTotal": 2
+  },
+  "ignoreRules": {
+    "fromGitignore": [
+      "node_modules/",
+      "dist/",
+      "data/*.db",
+      "data/docs/",
+      "server/data/",
+      "server/src/data/",
+      ".env",
+      "*.log",
+      ".code-review-graph/",
+      ".agentspace/*"
+    ],
+    "default": [
+      "node_modules/**",
+      ".git/**",
+      ".github/**",
+      "dist/**",
+      "build/**",
+      ".next/**",
+      "__pycache__/**",
+      "*.lock",
+      "*.log",
+      "*.bin",
+      "*.pdf",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.mp4",
+      "*.zip",
+      "*.tar",
+      "*.gz"
+    ],
+    "skippedDirectories": [
+      "node_modules/ (all three: root, client, server)",
+      "dist/",
+      "data/"
+    ]
+  },
+  "gaps": [
+    {
+      "module": "client",
+      "type": "tests",
+      "description": "No test framework or test files exist"
+    },
+    {
+      "module": "server",
+      "type": "tests",
+      "description": "No test framework or test files exist"
+    },
+    {
+      "module": "client",
+      "type": "index.css",
+      "description": "Tailwind CSS entry point not read (styling details not captured)"
+    },
+    {
+      "module": "docs",
+      "type": "specs",
+      "description": "Design specs and plans not deeply read (7 doc files in docs/superpowers/)"
+    }
+  ],
+  "nextSteps": [
+    "Add test frameworks: Vitest for client (React Testing Library), Vitest for server",
+    "Review docs/superpowers/specs/2026-05-27-iwiki-design.md for design decisions",
+    "Review docs/superpowers/plans/ for implementation roadmap",
+    "Read client/src/index.css for Tailwind configuration and custom CSS"
+  ],
+  "truncated": false
+}
