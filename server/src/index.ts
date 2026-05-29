@@ -14,6 +14,7 @@ import vectorRoutes from './routes/vector';
 import chatRoutes from './routes/chat';
 import tagRoutes from './routes/tags';
 import uploadRoutes from './routes/uploads';
+import dataRoutes from './routes/data';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -31,6 +32,7 @@ app.use('/api/vector', vectorRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/data', dataRoutes);
 
 // 静态文件服务：上传的图片/视频
 app.use('/uploads', express.static(UPLOADS_DIR));

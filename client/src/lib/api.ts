@@ -119,4 +119,43 @@ export const api = {
     request<{ success: boolean; updated: number }>(`/tags/${encodeURIComponent(name)}`, {
       method: 'DELETE',
     }),
+  // 导出数据 - 直接下载 ZIP 文件，不走 request<T> 封装
+  exportData: async (): Promise<void> => {
+    const res = await fetch(`${BASE}/data/export`, {
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || '导出失败');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `iwiki-export-${new Date().toISOString().slice(0, 10)}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
+  // 导入数据 - 上传 ZIP 文件
+  importData: async (file: File): Promise<{
+    nodesAdded: number;
+    versionsAdded: number;
+    commentsAdded: number;
+    embeddingsAdded: number;
+    docsAdded: number;
+    uploadsAdded: number;
+  }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${BASE}/data/import`, {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || '导入失败');
+    }
+    return res.json();
+  },
 };

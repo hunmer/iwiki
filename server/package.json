@@ -17,6 +17,8 @@
     "@langchain/core": "^1.1.48",
     "@langchain/openai": "^1.4.7",
     "@langchain/textsplitters": "^1.0.1",
+    "adm-zip": "^0.5.17",
+    "archiver": "^8.0.0",
     "better-sqlite3": "^12.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -27,6 +29,8 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/archiver": "^7.0.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",

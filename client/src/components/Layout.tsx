@@ -1,5 +1,5 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, LogOut, LogIn, Terminal, Sun, Moon, Tags } from 'lucide-react';
+import { Search, Menu, LogOut, LogIn, Terminal, Sun, Moon, Tags, Settings } from 'lucide-react';
 import { Inspector } from 'react-dev-inspector';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { useState } from 'react';
 import SearchDialog from '@/components/SearchDialog';
 import TagManageDialog from '@/components/TagManageDialog';
 import UnsavedChangesDialog from '@/components/UnsavedChangesDialog';
+import SettingsDialog from '@/components/SettingsDialog';
 import { useNavigationGuard } from '@/hooks/useNavigationGuard';
 
 export default function Layout() {
@@ -17,9 +18,10 @@ export default function Layout() {
   const toggleSidebar = useWikiStore((s) => s.toggleSidebar);
   const [searchOpen, setSearchOpen] = useState(false);
   const [tagManageOpen, setTagManageOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { showDialog, onConfirm, onCancel } = useNavigationGuard();
+  const { showDialog, onProceed, onReset } = useNavigationGuard();
 
   const handleLogout = async () => {
     await api.logout();
@@ -45,6 +47,9 @@ export default function Layout() {
         <Button variant="ghost" size="sm" onClick={() => setTagManageOpen(true)} className="text-muted-foreground hover:text-primary">
           <Tags className="h-4 w-4 mr-1" /> 标签
         </Button>
+        <Button variant="ghost" size="sm" onClick={() => setSettingsOpen(true)} className="text-muted-foreground hover:text-primary">
+          <Settings className="h-4 w-4 mr-1" /> 设置
+        </Button>
         {isAuthenticated ? (
           <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-primary">
             <LogOut className="h-4 w-4 mr-1" /> 退出
@@ -60,7 +65,8 @@ export default function Layout() {
       </div>
       <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
       <TagManageDialog open={tagManageOpen} onOpenChange={setTagManageOpen} />
-      <UnsavedChangesDialog open={showDialog} onConfirm={onConfirm} onCancel={onCancel} />
+      <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <UnsavedChangesDialog open={showDialog} onProceed={onProceed} onReset={onReset} />
       <Inspector />
     </div>
   );
